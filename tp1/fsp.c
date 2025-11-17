@@ -1,0 +1,575 @@
+#include "header.h"
+
+/* =============== Question 1 : Chargement =============== */
+
+Instance* load_instance(const char* path) {
+    int test=0;
+    if (!path) return NULL;
+    FILE* file = fopen(path, "r");
+    if (!file) return NULL;
+
+    Instance* inst = malloc(sizeof(Instance));
+    if (!inst) { fclose(file); return NULL; }
+
+    test=fscanf(file, "%d", &inst->nb_job);
+    test=fscanf(file, "%d", &inst->nb_machine);
+    test=fscanf(file, "%ld", &inst->seed);
+
+    inst->processing_times = malloc(inst->nb_job * sizeof(int*));
+    if (!inst->processing_times) { free(inst); fclose(file); return NULL; }
+
+    for (int i = 0; i < inst->nb_job && test; i++) {
+        int job_id, dummy;
+        test=fscanf(file, "%d", &job_id);
+        test=fscanf(file, "%d", &dummy); // valeur à ignorer
+
+        inst->processing_times[job_id] = malloc(inst->nb_machine * sizeof(int));
+        for (int j = 0; j < inst->nb_machine; j++) {
+            test=fscanf(file, "%d", &inst->processing_times[job_id][j]);
+        }
+    }
+    fclose(file);
+    return inst;
+}
+
+/* =============== Question 1 : Affichage =============== */
+
+void afficher(Instance* inst) {
+    if (!inst) return;
+    printf("Instance: %d jobs, %d machines, seed=%ld\n",
+           inst->nb_job, inst->nb_machine, inst->seed);
+    for (int i = 0; i < inst->nb_job; i++) {
+        printf("Job %d: ", i);
+        for (int j = 0; j < inst->nb_machine; j++) {
+            printf("%d ", inst->processing_times[i][j]);
+        }
+        printf("\n");
+    }
+}
+
+
+void affiche_paids(Pair *p,int n){
+    if (p==NULL)
+    {
+        return;
+    }
+    for (int i = 0; i < n; i++)
+    {
+        printf("(%d,%d),",p[i].a,p[i].b);
+        if (i>15)
+        {
+            printf("\n");
+        }
+        
+    }
+}
+
+void afficher_solution(int* sol,int n,int cost){
+    if (sol==NULL)
+    {
+        return;
+    }
+    for (int i = 0; i < n; i++)
+    {
+        printf("%d ",sol[i]);
+    }
+    printf("| cost=%d\n",cost);
+}
+
+/* =============== Question 1 : Libération =============== */
+
+void free_memory(Instance* inst) {
+    if (!inst) return;
+    for (int i = 0; i < inst->nb_job; i++) {
+        free(inst->processing_times[i]);
+    }
+    free(inst->processing_times);
+    free(inst);
+}
+
+/* =============== Question 2 =============== */
+
+int* generate_valid_solution(int n) {
+    int* sol = malloc(n * sizeof(int));
+    if (!sol) return NULL;
+    for (int i = 0; i < n; i++) sol[i] = i;
+
+    for (int i = n - 1; i > 0; i--) {
+        int j = rand() % (i + 1);
+        echange(sol, i, j);
+    }
+    return sol;
+}
+
+/* =============== Question 3 =============== */
+
+int compute_makespan(Instance* inst, int* solution) {
+    int n = inst->nb_job;
+    int m = inst->nb_machine;
+    int** comp = malloc(n * sizeof(int*));
+    for (int i = 0; i < n; i++) comp[i] = calloc(m, sizeof(int));
+
+    for (int i = 0; i < n; i++) {
+        int job = solution[i];
+        for (int j = 0; j < m; j++) {
+            int up = (i > 0) ? comp[i-1][j] : 0;
+            int left = (j > 0) ? comp[i][j-1] : 0;
+            comp[i][j] = (up > left ? up : left) + inst->processing_times[job][j];
+        }
+    }
+    int last_job=n-1,last_machine=m-1;
+    int makespan = comp!=NULL && comp[last_job]!=NULL?comp[last_job][last_machine]:0;
+    for (int i = 0; i < n; i++) free(comp[i]);
+    free(comp);
+    return makespan;
+}
+
+/* =============== Question 4 =============== */
+
+void echange(int* sol, int i, int j) {
+    if (i == j) return;
+    int tmp = sol[i];
+    sol[i] = sol[j];
+    sol[j] = tmp;
+}
+
+/* =============== Question 5 =============== */
+
+void insere(int* sol, int n, int from, int to) {
+    if (from == to || from < 0 || from >= n || to < 0 || to >= n) return;
+    int job = sol[from];
+    if (from < to) {
+        for (int i = from; i < to; i++) sol[i] = sol[i+1]; // from=2 to=5 sol[2]=sol[3]; sol[3]=sol[4]
+    } else {
+        for (int i = from; i > to; i--) sol[i] = sol[i-1];
+    }
+    sol[to] = job;
+}
+
+/* =============== Utilitaires pour les voisins =============== */
+
+Pair* generate_all_pairs(int n, int use_insert, int* total) {
+    if (use_insert) {
+        *total = n * (n - 1); // from != to
+        Pair* pairs = malloc((*total) * sizeof(Pair));
+        int idx = 0;
+        for (int from = 0; from < n; from++) {
+            for (int to = 0; to < n; to++) {
+                if (from != to) {
+                    pairs[idx].a = from;
+                    pairs[idx].b = to;
+                    idx++;
+                }
+            }
+        }
+        return pairs;
+    } else {
+        *total = n * (n - 1) / 2;
+        Pair* pairs = malloc((*total) * sizeof(Pair));
+        int idx = 0;
+        for (int i = 0; i < n; i++) {
+            for (int j = i + 1; j < n; j++) {
+                pairs[idx].a = i;
+                pairs[idx].b = j;
+                idx++;
+            }
+        }
+        return pairs;
+    }
+}
+
+void shuffle_pairs(Pair* pairs, int total) {
+    for (int i = total - 1; i > 0; i--) {
+        int j = rand() % (i + 1);
+        Pair tmp = pairs[i];
+        pairs[i] = pairs[j];
+        pairs[j] = tmp;
+    }
+}
+
+/* =============== Question 6 =============== */
+
+int* marche_aleatoire(Instance* inst, int max_evals, int* best_cost, int use_insert) {
+    int n = inst->nb_job;
+    int* current = generate_valid_solution(n);
+    int current_cost = compute_makespan(inst, current);
+    int* best = malloc(n * sizeof(int));
+    memcpy(best, current, n * sizeof(int));
+    afficher_solution(current,n,current_cost);
+    *best_cost = current_cost;
+    int evals = 1;
+
+    while (evals < max_evals) {
+        int i = rand() % n;
+        int j = use_insert ? (rand() % (n - 1)) : (rand() % n);
+        if (use_insert && j >= i) j++; // garantir j != i
+        if (!use_insert && i == j) j = (j + 1) % n;
+
+        if (use_insert) {
+            insere(current, n, i, j);
+        } else {
+            echange(current, i, j);
+        }
+
+        int new_cost = compute_makespan(inst, current);
+        evals++;
+        if (new_cost < *best_cost) {
+            *best_cost = new_cost;
+            afficher_solution(current,n,new_cost);
+            memcpy(best, current, n * sizeof(int));
+        }
+    }
+
+    free(current);
+    return best;
+}
+
+/* =============== Question 7 =============== */
+
+int* climber_first(Instance* inst, int max_evals, int* best_cost, int use_insert) {
+    int n = inst->nb_job;
+    int* current = generate_valid_solution(n);
+    int current_cost = compute_makespan(inst, current);
+    int evals = 1;
+    *best_cost = current_cost;
+    afficher_solution(current,n,current_cost);
+    while (evals < max_evals) {
+        int total;
+        Pair* pairs = generate_all_pairs(n, use_insert, &total);
+        shuffle_pairs(pairs, total);
+        int improved = 0;
+
+        for (int k = 0; k < total && evals < max_evals; k++) {
+            int a = pairs[k].a, b = pairs[k].b;
+            if (use_insert) {
+                insere(current, n, a, b);
+            } else {
+                echange(current, a, b);
+            }
+
+            int new_cost = compute_makespan(inst, current);
+            evals++;
+
+            if (new_cost < current_cost) {
+                current_cost = new_cost;
+                afficher_solution(current,n,new_cost);
+                improved = 1;
+                break; // first improvement
+            } else {
+                // annuler le mouvement
+                if (use_insert) {
+                    insere(current, n, b, a); // inversion approximative (à améliorer si besoin)
+                    // Meilleur : sauvegarder l'état ou recréer
+                    // Pour simplicité, on recrée la solution à chaque fois dans une vraie implémentation
+                    // Ici, on va plutôt recopier la solution de départ pour chaque voisin
+                } else {
+                    echange(current, a, b);
+                }
+            }
+        }
+
+        free(pairs);
+        if (!improved) break;
+    }
+
+    *best_cost = current_cost;
+    return current;
+}
+
+// Version robuste de climber_first (sans annulation manuelle)
+
+int* climber_first_safe(Instance* inst, int max_evals, int* best_cost, int use_insert) {
+    int n = inst->nb_job;
+    int* current = generate_valid_solution(n);
+    int current_cost = compute_makespan(inst, current);
+    int evals = 1;
+    *best_cost = current_cost;
+    afficher_solution(current,n,current_cost);
+
+    while (evals < max_evals) {
+        int total;
+        Pair* pairs = generate_all_pairs(n, use_insert, &total);
+        shuffle_pairs(pairs, total);
+        int improved = 0;
+
+        for (int k = 0; k < total && evals < max_evals; k++) {
+            int* candidate = malloc(n * sizeof(int));
+            memcpy(candidate, current, n * sizeof(int));
+
+            if (use_insert) {
+                insere(candidate, n, pairs[k].a, pairs[k].b);
+            } else {
+                echange(candidate, pairs[k].a, pairs[k].b);
+            }
+
+            int new_cost = compute_makespan(inst, candidate);
+            evals++;
+
+            if (new_cost < current_cost) {
+                free(current);
+                current = candidate;
+                current_cost = new_cost;
+                afficher_solution(current,n,new_cost);
+                improved = 1;
+                break;
+            } else {
+                free(candidate);
+            }
+        }
+
+        free(pairs);
+        if (!improved) break;
+    }
+
+    *best_cost = current_cost;
+    return current;
+}
+
+
+int* climber_first_safe_2(Instance* inst, int max_evals, int* best_cost, int use_insert,int* sol) {
+    int n = inst->nb_job;
+    int* current = malloc(sizeof(int)*n);
+    memcpy(current,sol, n * sizeof(int));
+    int current_cost = compute_makespan(inst, current);
+    int evals = 1;
+    *best_cost = current_cost;
+
+    while (evals < max_evals) {
+        int total;
+        Pair* pairs = generate_all_pairs(n, use_insert, &total);
+        shuffle_pairs(pairs, total);
+        int improved = 0;
+
+        for (int k = 0; k < total && evals < max_evals; k++) {
+            int* candidate = malloc(n * sizeof(int));
+            memcpy(candidate, current, n * sizeof(int));
+
+            if (use_insert) {
+                insere(candidate, n, pairs[k].a, pairs[k].b);
+            } else {
+                echange(candidate, pairs[k].a, pairs[k].b);
+            }
+
+            int new_cost = compute_makespan(inst, candidate);
+            evals++;
+
+            if (new_cost < current_cost) {
+                free(current);
+                current = candidate;
+                current_cost = new_cost;
+                afficher_solution(current,n,new_cost);
+                improved = 1;
+                break;
+            } else {
+                free(candidate);
+            }
+        }
+
+        free(pairs);
+        if (!improved) break;
+    }
+
+    *best_cost = current_cost;
+    return current;
+}
+
+int* climber_best(Instance* inst, int max_evals, int* best_cost, int use_insert) {
+    int n = inst->nb_job;
+    int* current = generate_valid_solution(n);
+    int current_cost = compute_makespan(inst, current);
+    int evals = 1;
+    *best_cost = current_cost;
+    afficher_solution(current,n,current_cost);
+    while (evals < max_evals) {
+        int total;
+        Pair* pairs = generate_all_pairs(n, use_insert, &total);
+        shuffle_pairs(pairs, total);
+
+        int best_local_cost = current_cost;
+        int best_idx = -1;
+        int* best_candidate = NULL;
+
+        for (int k = 0; k < total && evals < max_evals; k++) {
+            int* candidate = malloc(n * sizeof(int));
+            memcpy(candidate, current, n * sizeof(int));
+
+            if (use_insert) {
+                insere(candidate, n, pairs[k].a, pairs[k].b);
+            } else {
+                echange(candidate, pairs[k].a, pairs[k].b);
+            }
+
+            int cost = compute_makespan(inst, candidate);
+            evals++;
+
+            if (cost < best_local_cost) {
+                best_local_cost = cost;
+                best_idx = k;
+                if (best_candidate) free(best_candidate);
+                best_candidate = candidate;
+                afficher_solution(best_candidate,n,best_local_cost);
+            } else {
+                free(candidate);
+            }
+        }
+
+        free(pairs);
+
+        if (best_idx == -1) {
+            if (best_candidate) free(best_candidate);
+            break;
+        } else {
+            free(current);
+            current = best_candidate;
+            current_cost = best_local_cost;
+        }
+    }
+
+    *best_cost = current_cost;
+    return current;
+}
+
+/* =============== Question 8 =============== */
+
+int* algorithme_perso(Instance* inst, int max_evals, int* best_cost, int use_insert) {
+    int n = inst->nb_job;
+    int* global_best = NULL;
+    *best_cost = INT_MAX;
+    int evals = 0;
+
+    while (evals < max_evals) {
+        int local_cost;
+        int remaining = max_evals - evals;
+        int budget = (remaining > 10000) ? 10000 : remaining;
+
+        int* local_sol = climber_first_safe(inst, budget, &local_cost, use_insert);
+        
+        evals += budget;
+
+        if (local_cost < *best_cost) {
+            *best_cost = local_cost;
+            if (global_best) free(global_best);
+            global_best = local_sol;
+            afficher_solution(global_best,n,local_cost);
+        } else {
+            free(local_sol);
+        }
+    }
+
+    return global_best;
+}
+
+
+int* algorithme_perso_2(Instance* inst, int max_evals, int* best_cost, int use_insert) {
+    int n = inst->nb_job;
+    int evals = 0;
+
+    // 1. Définir un budget pour la première recherche (par ex. 10% ou 10k max)
+    int init_budget = (max_evals > 10000) ? 10000 : (max_evals / 10);
+    if (init_budget <= 0) init_budget = 1; // Assurer un budget minimum
+    if (init_budget > max_evals) init_budget = max_evals;
+
+    // 2. Générer la première solution de départ (point de départ de l'itération)
+    // Nous utilisons climber_first_safe pour garantir une bonne solution de départ
+    int* current_sol = climber_first_safe(inst, init_budget, best_cost, use_insert);
+    evals += init_budget; // Compter les évaluations utilisées
+
+    // 3. Initialiser 'global_best'. 
+    // global_best doit être une *copie* distincte de current_sol.
+    int* global_best = malloc(n * sizeof(int));
+    if (!global_best) { free(current_sol); return NULL; } // Gestion d'erreur
+    memcpy(global_best, current_sol, n * sizeof(int));
+    // *best_cost a déjà été défini par climber_first_safe
+    
+    // Afficher la première solution trouvée
+    printf("Solution initiale pour perso_2:\n");
+    afficher_solution(global_best, n, *best_cost);
+
+    while (evals < max_evals) {
+        int local_cost;
+        int remaining = max_evals - evals;
+        int budget = (remaining > 10000) ? 10000 : remaining;
+        
+        // 4. [FIX] Lancer la recherche locale suivante à partir de 'current_sol'
+        // Le résultat est stocké dans 'next_sol' (un NOUVEAU pointeur)
+        int* next_sol = climber_first_safe_2(inst, budget, &local_cost, use_insert, current_sol);
+        evals += budget;
+
+        // 5. [FIX] Nous n'avons plus besoin de l'ancien point de départ.
+        free(current_sol);
+
+        // 6. [FIX] Le résultat de cette recherche ('next_sol') 
+        // devient le point de départ pour la prochaine itération.
+        current_sol = next_sol;
+
+        // 7. [FIX] Vérifier si ce nouvel optimum local est le meilleur globalement
+        if (local_cost < *best_cost) {
+            *best_cost = local_cost;
+            // Nous devons COPIER le contenu, car 'current_sol' sera libéré
+            // à la prochaine itération (étape 5).
+            memcpy(global_best, current_sol, n * sizeof(int));
+            
+            printf("Nouvelle meilleure solution trouvée (perso_2):\n");
+            afficher_solution(global_best, n, *best_cost);
+        }
+        // [FIX] Il n'y a PAS de 'else { free(current_sol); }' !
+        // Nous avons besoin de 'current_sol' pour la prochaine itération.
+    }
+
+    // 8. [FIX] Nettoyer le dernier 'current_sol' qui n'est plus utilisé
+    free(current_sol);
+
+    // 9. Retourner la copie de la meilleure solution
+    return global_best;
+}
+
+/* =============== Question 9 =============== */
+
+int main(int argc, char* argv[]) {
+    if (argc != 4) {
+        fprintf(stderr, "Usage: %s <instance_path> <k_executions> <max_evals>\n", argv[0]);
+        return EXIT_FAILURE;
+    }
+
+    char* path = argv[1];
+    int k = atoi(argv[2]);
+    int max_evals = atoi(argv[3]);
+
+    Instance* inst = load_instance(path);
+    if (!inst) {
+        fprintf(stderr, "Erreur: impossible de charger l'instance.\n");
+        return EXIT_FAILURE;
+    }
+
+    srand(time(NULL));
+
+    struct {
+        char* name;
+        int* (*func)(Instance*, int, int*, int);
+    } algos[] = {
+        {"Marche aléatoire", marche_aleatoire},
+        {"Climber First", climber_first_safe},
+        {"Climber Best", climber_best},
+        {"Mon algorithme", algorithme_perso},
+        {"Mon algorithme v2", algorithme_perso_2}
+    };
+
+    for (int use_insert = 0; use_insert <= 1; use_insert++) {
+        const char* voisinage = use_insert ? "Insertion" : "Échange";
+        printf("\n=== Voisinage: %s ===\n", voisinage);
+
+        for (int a = 0; a < 5; a++) {
+            double sum_cost = 0.0;
+            for (int run = 0; run < k; run++) {
+                int cost;
+                int* sol = algos[a].func(inst, max_evals, &cost, use_insert);
+                sum_cost += cost;
+                free(sol);
+            }
+            printf("%s : coût moyen = %.2f\n", algos[a].name, sum_cost / k);
+        }
+    }
+
+    free_memory(inst);
+    return EXIT_SUCCESS;
+}
