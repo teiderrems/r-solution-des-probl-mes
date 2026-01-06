@@ -1,0 +1,7 @@
+# Statistiques globales (10 runs)
+Hypervolume_scalaire_moyen: 5679914.68
+Hypervolume_pareto_moyen: 4760584.01
+Temps_scalaire_moyen: 0.151
+Temps_pareto_moyen: 16.778
+Solutions_scalaire_moyen: 4.9
+Solutions_pareto_moyen: 8.4
