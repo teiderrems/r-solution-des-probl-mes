@@ -1,7 +1,0 @@
-# Statistiques d'execution - Run 10
-Hypervolume_scalaire: 0.00
-Hypervolume_pareto: 0.00
-Solutions_scalaire: 0
-Solutions_pareto: 11
-Temps_scalaire: 0.000
-Temps_pareto: 25.665
