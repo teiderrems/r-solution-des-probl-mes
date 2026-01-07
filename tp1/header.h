@@ -28,6 +28,18 @@ typedef struct {
     int a, b;
 } Pair;
 
+/**
+ * @brief Structure de configuration pour le programme.
+ */
+typedef struct {
+    char instance_file[256];
+    int k_executions;
+    int max_evals;
+    char output_dir[256];
+    long seed;
+    int verbose;
+} Config;
+
 /* =============== Chargement et gestion mémoire =============== */
 
 /**

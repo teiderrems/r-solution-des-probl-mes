@@ -1,4 +1,119 @@
 #include "header.h"
+#include <time.h>
+#include <unistd.h>
+#include <sys/stat.h>
+
+int verbose = 0;
+
+/* =============== Fonctions de configuration =============== */
+
+void afficher_aide() {
+    printf("Usage: fsp [OPTIONS] <instance_file>\n");
+    printf("Solveur pour le problème Flow Shop de permutation (mono-objectif).\n\n");
+    printf("Options:\n");
+    printf("  -k, --executions <n>    Nombre d'exécutions à moyenner (défaut: 10)\n");
+    printf("  -m, --max-evals <n>     Budget maximum d'évaluations (défaut: 10000)\n");
+    printf("  -o, --output-dir <dir>  Répertoire de sortie (défaut: .)\n");
+    printf("  -s, --seed <n>          Graine pour le générateur aléatoire (défaut: basée sur l'heure)\n");
+    printf("  -v, --verbose           Mode verbeux\n");
+    printf("  -h, --help              Afficher cette aide\n\n");
+    printf("Exemples:\n");
+    printf("  fsp instances/20_10_01.txt\n");
+    printf("  fsp -k 5 -m 50000 -o results instances/20_10_01.txt\n");
+    printf("  fsp -v -s 12345 instances/7_5_01.txt\n");
+}
+
+int parse_arguments(int argc, char *argv[], Config *config) {
+    // Valeurs par défaut
+    strcpy(config->instance_file, "");
+    config->k_executions = 10;
+    config->max_evals = 10000;
+    config->verbose = 0;
+    strcpy(config->output_dir, ".");
+    config->seed = -1;
+
+    // Vérification des arguments
+    if (argc < 2) {
+        afficher_aide();
+        return 1;
+    }
+
+    // Parse des arguments
+    for (int i = 1; i < argc; i++) {
+        if (strcmp(argv[i], "-h") == 0 || strcmp(argv[i], "--help") == 0) {
+            afficher_aide();
+            return 1;
+        }
+        else if (strcmp(argv[i], "-k") == 0 || strcmp(argv[i], "--executions") == 0) {
+            if (i + 1 < argc) {
+                config->k_executions = atoi(argv[++i]);
+            } else {
+                printf("Erreur: option -k requiert une valeur\n");
+                return 1;
+            }
+        }
+        else if (strcmp(argv[i], "-m") == 0 || strcmp(argv[i], "--max-evals") == 0) {
+            if (i + 1 < argc) {
+                config->max_evals = atoi(argv[++i]);
+            } else {
+                printf("Erreur: option -m requiert une valeur\n");
+                return 1;
+            }
+        }
+        else if (strcmp(argv[i], "-o") == 0 || strcmp(argv[i], "--output-dir") == 0) {
+            if (i + 1 < argc) {
+                strcpy(config->output_dir, argv[++i]);
+            } else {
+                printf("Erreur: option -o requiert une valeur\n");
+                return 1;
+            }
+        }
+        else if (strcmp(argv[i], "-s") == 0 || strcmp(argv[i], "--seed") == 0) {
+            if (i + 1 < argc) {
+                config->seed = atol(argv[++i]);
+            } else {
+                printf("Erreur: option -s requiert une valeur\n");
+                return 1;
+            }
+        }
+        else if (strcmp(argv[i], "-v") == 0 || strcmp(argv[i], "--verbose") == 0) {
+            config->verbose = 1;
+        }
+        else {
+            // C'est probablement le nom du fichier d'instance
+            strcpy(config->instance_file, argv[i]);
+        }
+    }
+
+    // Vérification du fichier d'instance
+    if (strlen(config->instance_file) == 0) {
+        printf("Erreur: nom de fichier d'instance manquant\n");
+        afficher_aide();
+        return 1;
+    }
+
+    // Vérification des valeurs
+    if (config->k_executions <= 0) {
+        printf("Erreur: nombre d'exécutions doit être > 0\n");
+        return 1;
+    }
+    if (config->max_evals <= 0) {
+        printf("Erreur: nombre maximum d'évaluations doit être > 0\n");
+        return 1;
+    }
+
+    // Vérification du répertoire de sortie
+    struct stat st = {0};
+    if (stat(config->output_dir, &st) == -1) {
+        // Création du répertoire
+        if (mkdir(config->output_dir, 0777) != 0) {
+            printf("Erreur: impossible de créer le répertoire %s\n", config->output_dir);
+            return 1;
+        }
+    }
+
+    return 0;
+}
 
 /* =============== Question 1 : Chargement =============== */
 
@@ -104,11 +219,26 @@ int* generate_valid_solution(int n) {
 /* =============== Question 3 =============== */
 
 int compute_makespan(Instance* inst, int* solution) {
+    if (!inst || !solution) return 0;
+    
     int n = inst->nb_job;
     int m = inst->nb_machine;
+    
+    // Allocation avec vérification d'erreur
     int** comp = malloc(n * sizeof(int*));
-    for (int i = 0; i < n; i++) comp[i] = calloc(m, sizeof(int));
+    if (!comp) return 0;
+    
+    for (int i = 0; i < n; i++) {
+        comp[i] = calloc(m, sizeof(int));
+        if (!comp[i]) {
+            // Libérer la mémoire déjà allouée en cas d'erreur
+            for (int k = 0; k < i; k++) free(comp[k]);
+            free(comp);
+            return 0;
+        }
+    }
 
+    // Calcul du makespan
     for (int i = 0; i < n; i++) {
         int job = solution[i];
         for (int j = 0; j < m; j++) {
@@ -117,13 +247,15 @@ int compute_makespan(Instance* inst, int* solution) {
             comp[i][j] = (up > left ? up : left) + inst->processing_times[job][j];
         }
     }
-    int last_job=n-1,last_machine=m-1;
-    int makespan = comp!=NULL && comp[last_job]!=NULL?comp[last_job][last_machine]:0;
+    
+    int makespan = comp[n-1][m-1];
+    
+    // Libération de la mémoire
     for (int i = 0; i < n; i++) free(comp[i]);
     free(comp);
+    
     return makespan;
 }
-
 /* =============== Question 4 =============== */
 
 void echange(int* sol, int i, int j) {
@@ -195,7 +327,7 @@ int* marche_aleatoire(Instance* inst, int max_evals, int* best_cost, int use_ins
     int current_cost = compute_makespan(inst, current);
     int* best = malloc(n * sizeof(int));
     memcpy(best, current, n * sizeof(int));
-    afficher_solution(current,n,current_cost);
+    if (verbose) afficher_solution(current,n,current_cost);
     *best_cost = current_cost;
     int evals = 1;
 
@@ -215,7 +347,7 @@ int* marche_aleatoire(Instance* inst, int max_evals, int* best_cost, int use_ins
         evals++;
         if (new_cost < *best_cost) {
             *best_cost = new_cost;
-            afficher_solution(current,n,new_cost);
+            if (verbose) afficher_solution(current,n,new_cost);
             memcpy(best, current, n * sizeof(int));
         }
     }
@@ -232,7 +364,7 @@ int* climber_first(Instance* inst, int max_evals, int* best_cost, int use_insert
     int current_cost = compute_makespan(inst, current);
     int evals = 1;
     *best_cost = current_cost;
-    afficher_solution(current,n,current_cost);
+    if (verbose) afficher_solution(current,n,current_cost);
     while (evals < max_evals) {
         int total;
         Pair* pairs = generate_all_pairs(n, use_insert, &total);
@@ -252,7 +384,7 @@ int* climber_first(Instance* inst, int max_evals, int* best_cost, int use_insert
 
             if (new_cost < current_cost) {
                 current_cost = new_cost;
-                afficher_solution(current,n,new_cost);
+                if (verbose) afficher_solution(current,n,new_cost);
                 improved = 1;
                 break; // first improvement
             } else {
@@ -284,7 +416,7 @@ int* climber_first_safe(Instance* inst, int max_evals, int* best_cost, int use_i
     int current_cost = compute_makespan(inst, current);
     int evals = 1;
     *best_cost = current_cost;
-    afficher_solution(current,n,current_cost);
+    if (verbose) afficher_solution(current,n,current_cost);
 
     while (evals < max_evals) {
         int total;
@@ -309,7 +441,7 @@ int* climber_first_safe(Instance* inst, int max_evals, int* best_cost, int use_i
                 free(current);
                 current = candidate;
                 current_cost = new_cost;
-                afficher_solution(current,n,new_cost);
+                if (verbose) afficher_solution(current,n,new_cost);
                 improved = 1;
                 break;
             } else {
@@ -357,7 +489,7 @@ int* climber_first_safe_2(Instance* inst, int max_evals, int* best_cost, int use
                 free(current);
                 current = candidate;
                 current_cost = new_cost;
-                afficher_solution(current,n,new_cost);
+                if (verbose) afficher_solution(current,n,new_cost);
                 improved = 1;
                 break;
             } else {
@@ -379,7 +511,7 @@ int* climber_best(Instance* inst, int max_evals, int* best_cost, int use_insert)
     int current_cost = compute_makespan(inst, current);
     int evals = 1;
     *best_cost = current_cost;
-    afficher_solution(current,n,current_cost);
+    if (verbose) afficher_solution(current,n,current_cost);
     while (evals < max_evals) {
         int total;
         Pair* pairs = generate_all_pairs(n, use_insert, &total);
@@ -407,7 +539,7 @@ int* climber_best(Instance* inst, int max_evals, int* best_cost, int use_insert)
                 best_idx = k;
                 if (best_candidate) free(best_candidate);
                 best_candidate = candidate;
-                afficher_solution(best_candidate,n,best_local_cost);
+                if (verbose) afficher_solution(best_candidate,n,best_local_cost);
             } else {
                 free(candidate);
             }
@@ -450,7 +582,7 @@ int* algorithme_perso(Instance* inst, int max_evals, int* best_cost, int use_ins
             *best_cost = local_cost;
             if (global_best) free(global_best);
             global_best = local_sol;
-            afficher_solution(global_best,n,local_cost);
+            if (verbose) afficher_solution(global_best,n,local_cost);
         } else {
             free(local_sol);
         }
@@ -482,8 +614,10 @@ int* algorithme_perso_2(Instance* inst, int max_evals, int* best_cost, int use_i
     // *best_cost a déjà été défini par climber_first_safe
     
     // Afficher la première solution trouvée
-    printf("Solution initiale pour perso_2:\n");
-    afficher_solution(global_best, n, *best_cost);
+    if (verbose) {
+        printf("Solution initiale pour perso_2:\n");
+        afficher_solution(global_best, n, *best_cost);
+    }
 
     while (evals < max_evals) {
         int local_cost;
@@ -509,8 +643,10 @@ int* algorithme_perso_2(Instance* inst, int max_evals, int* best_cost, int use_i
             // à la prochaine itération (étape 5).
             memcpy(global_best, current_sol, n * sizeof(int));
             
-            printf("Nouvelle meilleure solution trouvée (perso_2):\n");
-            afficher_solution(global_best, n, *best_cost);
+            if (verbose) {
+                printf("Nouvelle meilleure solution trouvée (perso_2):\n");
+                afficher_solution(global_best, n, *best_cost);
+            }
         }
         // [FIX] Il n'y a PAS de 'else { free(current_sol); }' !
         // Nous avons besoin de 'current_sol' pour la prochaine itération.
@@ -526,14 +662,18 @@ int* algorithme_perso_2(Instance* inst, int max_evals, int* best_cost, int use_i
 /* =============== Question 9 =============== */
 
 int main(int argc, char* argv[]) {
-    if (argc != 4) {
-        fprintf(stderr, "Usage: %s <instance_path> <k_executions> <max_evals>\n", argv[0]);
+    Config config;
+    if (parse_arguments(argc, argv, &config) != 0) {
         return EXIT_FAILURE;
     }
 
-    char* path = argv[1];
-    int k = atoi(argv[2]);
-    int max_evals = atoi(argv[3]);
+    verbose = config.verbose;
+
+    char* path = config.instance_file;
+    int k = config.k_executions;
+    int max_evals = config.max_evals;
+    char* output_dir = config.output_dir;
+    long seed = config.seed;
 
     Instance* inst = load_instance(path);
     if (!inst) {
@@ -541,7 +681,12 @@ int main(int argc, char* argv[]) {
         return EXIT_FAILURE;
     }
 
-    srand(time(NULL));
+    srand(seed == -1 ? time(NULL) : seed);
+
+    if (verbose) afficher(inst);
+
+    double avg_costs[2][5];
+    double avg_times[2][5];
 
     struct {
         char* name;
@@ -560,13 +705,56 @@ int main(int argc, char* argv[]) {
 
         for (int a = 0; a < 5; a++) {
             double sum_cost = 0.0;
+            double sum_time = 0.0;
             for (int run = 0; run < k; run++) {
                 int cost;
+                clock_t start = clock();
                 int* sol = algos[a].func(inst, max_evals, &cost, use_insert);
+                clock_t end = clock();
+                sum_time += (double)(end - start) / CLOCKS_PER_SEC;
                 sum_cost += cost;
+                if (verbose) afficher_solution(sol, inst->nb_job, cost);
                 free(sol);
             }
-            printf("%s : coût moyen = %.2f\n", algos[a].name, sum_cost / k);
+            printf("%s : coût moyen = %.2f, temps moyen = %.3f s\n", algos[a].name, sum_cost / k, sum_time / k);
+            avg_costs[use_insert][a] = sum_cost / k;
+            avg_times[use_insert][a] = sum_time / k;
+        }
+    }
+
+    // Sauvegarde des résultats si demandé
+    if (strcmp(output_dir, ".") != 0) {
+        mkdir(output_dir, 0755);
+        const char* voisinages[2] = {"Échange", "Insertion"};
+        for (int v = 0; v < 2; v++) {
+            char filepath[256];
+            sprintf(filepath, "%s/results_%s.txt", output_dir, v == 0 ? "echange" : "insertion");
+            FILE* f = fopen(filepath, "w");
+            if (f) {
+                fprintf(f, "# Résultats pour l'instance %s - Voisinage %s\n", config.instance_file, voisinages[v]);
+                fprintf(f, "# k_executions=%d, max_evals=%d, seed=%ld\n", config.k_executions, config.max_evals, config.seed);
+                fprintf(f, "# Algorithme\tCoût moyen\tTemps moyen (s)\n");
+                for (int a = 0; a < 5; a++) {
+                    fprintf(f, "%s\t%.2f\t%.3f\n", algos[a].name, avg_costs[v][a], avg_times[v][a]);
+                }
+                fclose(f);
+            }
+        }
+
+        // Générer le script gnuplot
+        char filepath[256];
+        sprintf(filepath, "%s/plot.gnuplot", output_dir);
+        FILE* g = fopen(filepath, "w");
+        if (g) {
+            fprintf(g, "set terminal png size 800,600\n");
+            fprintf(g, "set output '%s/results.png'\n", output_dir);
+            fprintf(g, "set title 'Comparaison des algorithmes - Instance %s'\n", config.instance_file);
+            fprintf(g, "set xlabel 'Algorithme'\n");
+            fprintf(g, "set ylabel 'Coût moyen'\n");
+            fprintf(g, "set xtics rotate by -45\n");
+            fprintf(g, "set key outside\n");
+            fprintf(g, "plot '%s/results_echange.txt' using 2:xtic(1) title 'Échange' with linespoints, '%s/results_insertion.txt' using 2:xtic(1) title 'Insertion' with linespoints\n", output_dir, output_dir);
+            fclose(g);
         }
     }
 

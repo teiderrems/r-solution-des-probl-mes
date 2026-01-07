@@ -19,19 +19,35 @@ gcc -fdiagnostics-color=always -g fsp.c -o fsp
 **Exécution**:
 
 ```
-./fsp <chemin_instance> <k_executions> <max_evals>
+./fsp [OPTIONS] <instance_file>
 ```
 
-- `<chemin_instance>` : chemin vers un fichier d'instance (ex. `../instances/20_10_01.txt`).
-- `<k_executions>` : nombre d'exécutions à moyenner par algorithme (ex. `10`).
-- `<max_evals>` : budget maximum d'évaluations (ex. `100000`).
+Options disponibles :
+- `-k, --executions <n>` : nombre d'exécutions à moyenner par algorithme (défaut : 10)
+- `-m, --max-evals <n>` : budget maximum d'évaluations (défaut : 10000)
+- `-o, --output-dir <dir>` : répertoire de sortie pour sauvegarder les résultats (défaut : .)
+- `-s, --seed <n>` : graine pour le générateur aléatoire (défaut : basée sur l'heure)
+- `-v, --verbose` : active l'affichage verbeux
+- `-h, --help` : affiche l'aide
 
-Exemple :
+Exemples :
 ```
-./fsp ../instances/20_10_01.txt 5 10000
+./fsp instances/20_10_01.txt
+./fsp -k 5 -m 50000 -o results instances/20_10_01.txt
+./fsp -v -s 12345 instances/7_5_01.txt
 ```
 
-Le programme lance les algorithmes pour les deux voisinages (`Échange` et `Insertion`) et affiche le coût moyen (makespan) pour chaque algorithme.
+Le programme lance les algorithmes pour les deux voisinages (`Échange` et `Insertion`) et affiche le coût moyen (makespan) et le temps d'exécution moyen pour chaque algorithme. En mode verbeux (`-v`), il affiche également l'instance et les solutions intermédiaires.
+
+Si un répertoire de sortie est spécifié (`-o`), le programme sauvegarde les résultats dans des fichiers texte et génère un script Gnuplot pour visualiser la comparaison des algorithmes.
+
+**Nouvelles fonctionnalités (v1.1)**:
+- **Mode verbeux** (`-v`) : Affiche l'instance chargée et les solutions intermédiaires pour chaque exécution
+- **Mesure du temps d'exécution** : Affiche le temps moyen d'exécution pour chaque algorithme
+- **Arguments nommés modernes** : Interface avec options longues (`--executions`) et courtes (`-k`)
+- **Sauvegarde automatique des résultats** : Génération de fichiers texte et scripts Gnuplot
+- **Configuration structurée** : Parsing robuste avec validation, valeurs par défaut et aide intégrée
+- **Création automatique de répertoires** : Le répertoire de sortie est créé si nécessaire
 
 **Algorithmes implémentés**:
 - Marche aléatoire (`marche_aleatoire`)
@@ -55,7 +71,7 @@ Le programme lance les algorithmes pour les deux voisinages (`Échange` et `Inse
 - Ajouter des tests unitaires pour `compute_makespan`, `insere` et `echange`.
 - Mesurer et profiler les performances (profiling, optimisation mémoire).
 - Implémenter une annulation efficace (undo) pour `insere` afin d'éviter la copie intégrale des solutions.
-- Ajouter un mode verbeux / logging et options en ligne de commande (par ex. choix d'algorithme, seed fixe).
+- Ajouter un mode verbeux / logging et options en ligne de commande (par ex. choix d'algorithme, seed fixe). ✅ **Implémenté : options `-v`, `-k`, `-m`, `-o`, `-s`, `-h` avec parsing structuré.**
 - Supporter la lecture d'instances au format différent ou la génération aléatoire d'instances pour tests.
 
 **Conseils d'utilisation**:
