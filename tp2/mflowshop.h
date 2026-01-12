@@ -34,9 +34,9 @@
  * @brief Structure représentant un job avec ses caractéristiques
  */
 typedef struct {
-    int id;
-    int due_date;
-    int *processing_times;
+    int id;                           /**< Identifiant unique du job */
+    int due_date;                     /**< Date d'échéance du job */
+    int *processing_times;            /**< Tableau des temps de traitement sur chaque machine */
 } Job;
 
 /**
@@ -44,9 +44,9 @@ typedef struct {
  * @brief Structure représentant une instance complète du problème
  */
 typedef struct {
-    int nb_jobs;
-    int nb_machines;
-    Job *jobs;
+    int nb_jobs;                      /**< Nombre total de jobs dans l'instance */
+    int nb_machines;                  /**< Nombre total de machines dans l'instance */
+    Job *jobs;                        /**< Tableau des jobs de l'instance */
 } Instance;
 
 /**
@@ -54,8 +54,8 @@ typedef struct {
  * @brief Structure représentant un vecteur d'objectifs
  */
 typedef struct {
-    int makespan;
-    int tardiness;
+    int makespan;                     /**< Valeur du makespan (Cmax) */
+    int tardiness;                    /**< Valeur de la tardiness totale */
 } ObjectiveVector;
 
 /**
@@ -63,9 +63,9 @@ typedef struct {
  * @brief Structure représentant une archive de solutions non-dominées
  */
 typedef struct {
-    ObjectiveVector *vectors;
-    int size;
-    int capacity;
+    ObjectiveVector *vectors;          /**< Tableau des vecteurs objectifs dans l'archive */
+    int size;                          /**< Nombre actuel de solutions dans l'archive */
+    int capacity;                      /**< Capacité maximale de l'archive */
 } Archive;
 
 /**
@@ -73,19 +73,19 @@ typedef struct {
  * @brief Structure de configuration du programme
  */
 typedef struct {
-    char instance_file[256];
-    int offline_solutions;
-    int nb_poids;
-    int max_iterations;
-    int pareto_size;
-    int nb_runs;
-    int verbose;
-    int no_analyze;
-    char output_dir[256];
-    char algo_type[10];
-    int seed;
-    char input_dir[256];
-    int experiment;
+    char instance_file[256];          /**< Chemin du fichier d'instance à traiter */
+    int offline_solutions;            /**< Nombre de solutions pour le filtrage offline */
+    int nb_poids;                     /**< Nombre de poids pour l'approche scalaire */
+    int max_iterations;               /**< Nombre maximal d'itérations pour les algorithmes */
+    int pareto_size;                  /**< Taille initiale de l'archive Pareto */
+    int nb_runs;                      /**< Nombre d'exécutions répétées pour les statistiques */
+    int verbose;                      /**< Flag pour l'affichage détaillé (0=non, 1=oui) */
+    int no_analyze;                   /**< Flag pour désactiver l'analyse graphique (0=analyser, 1=non) */
+    char output_dir[256];             /**< Répertoire de sortie pour les résultats */
+    char algo_type[10];               /**< Type d'algorithme à exécuter ("scalar", "pareto", "all") */
+    int seed;                         /**< Graine pour le générateur de nombres aléatoires */
+    char input_dir[256];              /**< Répertoire contenant les fichiers d'instances */
+    int experiment;                   /**< Flag pour activer le mode expérimentation (0=non, 1=oui) */
 } Config;
 
 /**
@@ -93,12 +93,12 @@ typedef struct {
  * @brief Structure pour stocker les statistiques d'exécution
  */
 typedef struct {
-    double hypervolume_scalar;
-    double hypervolume_pareto;
-    int solutions_scalar;
-    int solutions_pareto;
-    double time_scalar;
-    double time_pareto;
+    double hypervolume_scalar;         /**< Hypervolume du front obtenu par l'approche scalaire */
+    double hypervolume_pareto;         /**< Hypervolume du front obtenu par l'approche Pareto */
+    int solutions_scalar;              /**< Nombre de solutions dans le front scalaire */
+    int solutions_pareto;              /**< Nombre de solutions dans le front Pareto */
+    double time_scalar;                /**< Temps d'exécution de l'approche scalaire (en secondes) */
+    double time_pareto;                /**< Temps d'exécution de l'approche Pareto (en secondes) */
 } Statistics;
 
 /* === DÉCLARATIONS DES FONCTIONS === */

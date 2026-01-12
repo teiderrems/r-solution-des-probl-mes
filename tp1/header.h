@@ -19,30 +19,34 @@
  * - processing_times[i][j] : temps de traitement du job i sur la machine j
  */
 typedef struct {
-    long int seed;
-    int nb_job;
-    int nb_machine;
-    int **processing_times;
+    long int seed;                    /**< Graine utilisée pour la génération aléatoire */
+    int nb_job;                       /**< Nombre de jobs dans l'instance (n) */
+    int nb_machine;                   /**< Nombre de machines dans l'instance (m) */
+    int **processing_times;           /**< Matrice des temps de traitement [job][machine] */
 } Instance;
 
 
 
+/**
+ * @brief Structure représentant une paire d'entiers.
+ */
 typedef struct {
-    int a, b;
+    int a;                            /**< Premier élément de la paire */
+    int b;                            /**< Deuxième élément de la paire */
 } Pair;
 
 /**
  * @brief Structure de configuration pour le programme.
  */
 typedef struct {
-    char instance_file[256];
-    int k_executions;
-    int max_evals;
-    char output_dir[256];
-    long seed;
-    int verbose;
-    char input_dir[256];
-    int experiment;
+    char instance_file[256];          /**< Chemin du fichier d'instance à traiter */
+    int k_executions;                 /**< Nombre d'exécutions répétées pour les statistiques */
+    int max_evals;                    /**< Nombre maximal d'évaluations de solutions */
+    char output_dir[256];             /**< Répertoire de sortie pour les résultats */
+    long seed;                        /**< Graine pour le générateur de nombres aléatoires */
+    int verbose;                      /**< Flag pour l'affichage détaillé (0=non, 1=oui) */
+    char input_dir[256];              /**< Répertoire contenant les fichiers d'instances */
+    int experiment;                   /**< Flag pour activer le mode expérimentation (0=non, 1=oui) */
 } Config;
 
 /* =============== Chargement et gestion mémoire =============== */
