@@ -71,7 +71,7 @@ ifndef INSTANCE
 endif
 	@printf "$(GREEN)▶ Exécution sur $(CYAN)$(INSTANCE)$(GREEN)...$(RESET)\n"
 	@printf "$(YELLOW)════════════════════════════════════════════════════════════$(RESET)\n"
-	@./$(TARGET) $(ARGS) $(INSTANCE) 2>&1
+	@./$(TARGET) $(ARGS) -f ./$(INSTANCE)
 
 # ========== Tests ==========
 test: $(TARGET)
@@ -99,7 +99,7 @@ run-all: $(TARGET)
 	@for instance in $(INSTANCES_DIR)/*.txt; do \
 		if [ -f "$$instance" ]; then \
 			printf "\n$(YELLOW)══ Exécution sur $(CYAN)$$instance$(YELLOW) ══$(RESET)\n"; \
-			./$(TARGET) $(ARGS) "$$instance" 2>&1; \
+			./$(TARGET) $(ARGS) -f "$$instance" 2>&1; \
 		fi \
 	done
 	@printf "\n$(GREEN)✓ Toutes les instances traitées$(RESET)\n"
@@ -190,4 +190,6 @@ help:
 	@printf "  -i, --iterations N         Nombre maximal d'itérations (defaut: 500)\n"
 	@printf "  -s, --size N               Taille initiale pour approche Pareto (defaut: 10)\n"
 	@printf "  -v, --verbose              Mode verbeux\n"
-	@printf "  --output-dir DIR           Répertoire de sortie (defaut: .)\n"
+	@printf "  -od, --output-dir DIR           Répertoire de sortie (defaut: .)\n"
+	@printf "  -id, --input-dir DIR           Répertoire des instances (defaut: ./instances)\n"
+	@printf "  -f, --instance-file FILE       Fichier instance (defaut: 7_5_01.txt)\n"

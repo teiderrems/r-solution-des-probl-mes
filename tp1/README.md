@@ -28,13 +28,18 @@ Options disponibles :
 - `-o, --output-dir <dir>` : répertoire de sortie pour sauvegarder les résultats (défaut : .)
 - `-s, --seed <n>` : graine pour le générateur aléatoire (défaut : basée sur l'heure)
 - `-v, --verbose` : active l'affichage verbeux
+- `-f, --instance-file <instance_file>` : nom de l'instance
+- `-i, --input-dir <dir>` : répertoire de l'instance 
 - `-h, --help` : affiche l'aide
 
 Exemples :
 ```
-./fsp instances/20_10_01.txt
-./fsp -k 5 -m 50000 -o results instances/20_10_01.txt
-./fsp -v -s 12345 instances/7_5_01.txt
+./fsp -f instances/20_10_01.txt
+./fsp --instance-file instances/20_10_01.txt
+./fsp -i instances -f 20_10_01.txt
+./fsp --input-dir instances --instance-file 20_10_01.txt
+./fsp -k 5 -m 50000 -o results -f instances/20_10_01.txt
+./fsp -v -s 12345 -f instances/7_5_01.txt
 ```
 
 Le programme lance les algorithmes pour les deux voisinages (`Échange` et `Insertion`) et affiche le coût moyen (makespan) et le temps d'exécution moyen pour chaque algorithme. En mode verbeux (`-v`), il affiche également l'instance et les solutions intermédiaires.
@@ -71,15 +76,10 @@ Si un répertoire de sortie est spécifié (`-o`), le programme sauvegarde les r
 - Ajouter des tests unitaires pour `compute_makespan`, `insere` et `echange`.
 - Mesurer et profiler les performances (profiling, optimisation mémoire).
 - Implémenter une annulation efficace (undo) pour `insere` afin d'éviter la copie intégrale des solutions.
-- Ajouter un mode verbeux / logging et options en ligne de commande (par ex. choix d'algorithme, seed fixe). ✅ **Implémenté : options `-v`, `-k`, `-m`, `-o`, `-s`, `-h` avec parsing structuré.**
+- Ajouter un mode verbeux / logging et options en ligne de commande (par ex. choix d'algorithme, seed fixe). ✅ **Implémenté : options `-v`, `-k`, `-m`, `-o`, `-s`, `-h`, `-f`, `-i` avec parsing structuré.**
 - Supporter la lecture d'instances au format différent ou la génération aléatoire d'instances pour tests.
 
 **Conseils d'utilisation**:
 - Pour expérimenter, fixer `srand` avec une valeur connue (remplacer `srand(time(NULL))` par `srand(12345)`).
 - Commencer avec un petit `max_evals` (ex. `1000`) pour tester rapidement, puis augmenter.
-
-Si vous voulez, je peux :
-- ajouter un script `run_all.sh` pour lancer plusieurs instances et collecter les résultats ;
-- ajouter des tests unitaires basiques (makefile ou script de test) ;
-- ou commiter ces changements dans un dépôt Git et créer un README au niveau supérieur.
 

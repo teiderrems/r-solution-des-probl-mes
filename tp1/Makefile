@@ -30,22 +30,22 @@ distclean: clean
 
 run: $(TARGET)
 	@echo "Exemple d'exécution :"
-	@echo "./fsp -k 5 -m 10000 instances/20_10_01.txt"
+	@echo "./fsp -k 5 -m 10000 -f instances/20_10_01.txt"
 
 test: $(TARGET)
 	@mkdir -p test_results
 	@echo "Tests de base en cours.."
 	@echo "=== Test 1: Instance 20_10_01 ==="
-	@./fsp -v instances/20_10_01.txt -k 2 -m 5000 2>&1 | tee test_results/test1.txt
+	@./fsp -v -f instances/20_10_01.txt -k 2 -m 5000 2>&1 | tee test_results/test1.txt
 	@echo "=== Test 2: Instance 20_5_01 ==="
-	@./fsp -v instances/20_5_01.txt -k 2 -m 5000 2>&1 | tee test_results/test2.txt
+	@./fsp -v -f instances/20_5_01.txt -k 2 -m 5000 2>&1 | tee test_results/test2.txt
 	@echo "=== Tests terminés ==="
 
 # ============ PROFILAGE ============
 profile: CFLAGS += -pg
 profile: clean $(TARGET)
 	@echo "Compilation avec profilage (gprof)..."
-	@./fsp -v instances/20_10_01.txt -k 1 -m 10000 -s 12345
+	@./fsp -v -f instances/20_10_01.txt -k 1 -m 10000 -s 12345
 	@gprof $(TARGET) gmon.out > profile_data.txt
 	@echo "Profilage terminé. Voir profile_data.txt"
 
@@ -90,11 +90,11 @@ help:
 	@echo "  help         : Affiche ce message"
 	@echo ""
 	@echo "Exemples :"
-	@echo "  make && ./fsp instances/20_10_01.txt -k 10 -m 100000"
-	@echo "  make && ./fsp -v instances/20_10_01.txt -k 10 -m 100000  # Mode verbeux"
-	@echo "  make && ./fsp instances/20_10_01.txt -k 5 -m 50000 -o results  # Sauvegarde"
-	@echo "  make && ./fsp instances/20_10_01.txt -k 5 -m 10000 -s 42  # Graine fixe"
-	@echo "  make debug && ./fsp instances/20_10_01.txt -k 1 -m 1000"
+	@echo "  make && ./fsp -f instances/20_10_01.txt -k 10 -m 100000"
+	@echo "  make && ./fsp -v -f instances/20_10_01.txt -k 10 -m 100000  # Mode verbeux"
+	@echo "  make && ./fsp -f instances/20_10_01.txt -k 5 -m 50000 -o results  # Sauvegarde"
+	@echo "  make && ./fsp -f instances/20_10_01.txt -k 5 -m 10000 -s 42  # Graine fixe"
+	@echo "  make debug && ./fsp -f instances/20_10_01.txt -k 1 -m 1000"
 	@echo "  make test   # Lance les tests de base"
 
 # ============ DEPENDANCES ============

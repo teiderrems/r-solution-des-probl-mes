@@ -1,0 +1,8 @@
+# Résultats pour l'instance 20_10_01.txt - Voisinage Insertion
+# k_executions=5, max_evals=10000, seed=-1
+# Algorithme	Coût moyen	Temps moyen (s)
+Marche aléatoire	1765.80	0.029
+Climber First	1645.20	0.003
+Climber Best	1632.20	0.015
+Mon algorithme	1639.40	0.003
+Mon algorithme v2	1617.80	0.004

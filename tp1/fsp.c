@@ -1,7 +1,4 @@
 #include "header.h"
-#include <time.h>
-#include <unistd.h>
-#include <sys/stat.h>
 
 int verbose = 0;
 
@@ -12,6 +9,8 @@ void afficher_aide() {
     printf("Solveur pour le problème Flow Shop de permutation (mono-objectif).\n\n");
     printf("Options:\n");
     printf("  -k, --executions <n>    Nombre d'exécutions à moyenner (défaut: 10)\n");
+    printf("  -i, --input-dir <dir>    Répertoire des instances (défaut: .)\n");
+    printf("  -f, --instance-file <instance_file>         Fichier d'instance au format Taillard\n");
     printf("  -m, --max-evals <n>     Budget maximum d'évaluations (défaut: 10000)\n");
     printf("  -o, --output-dir <dir>  Répertoire de sortie (défaut: .)\n");
     printf("  -s, --seed <n>          Graine pour le générateur aléatoire (défaut: basée sur l'heure)\n");
@@ -43,6 +42,30 @@ int parse_arguments(int argc, char *argv[], Config *config) {
         if (strcmp(argv[i], "-h") == 0 || strcmp(argv[i], "--help") == 0) {
             afficher_aide();
             return 1;
+        }
+        else if(strcmp(argv[i], "--instance-file") == 0 || strcmp(argv[i], "-f") == 0)
+        {
+            if (i+1<argc)
+            {
+                strcpy(config->instance_file, argv[++i]);
+            }
+            else
+            {
+                printf("Erreur: option -f requiert une valeur\n");
+                return 1;
+            }
+        }
+        else if (strcmp(argv[i], "--input-dir") == 0 || strcmp(argv[i], "-i") == 0)
+        {
+            if (i+1<argc)
+            {
+                strcpy(config->input_dir, argv[++i]);
+            }
+            else
+            {
+                printf("Erreur: option -i requiert une valeur\n");
+                return 1;
+            }
         }
         else if (strcmp(argv[i], "-k") == 0 || strcmp(argv[i], "--executions") == 0) {
             if (i + 1 < argc) {
@@ -80,8 +103,9 @@ int parse_arguments(int argc, char *argv[], Config *config) {
             config->verbose = 1;
         }
         else {
-            // C'est probablement le nom du fichier d'instance
-            strcpy(config->instance_file, argv[i]);
+            printf("Erreur: option inconnue '%s'\n", argv[i]);
+            afficher_aide();
+            return 1;
         }
     }
 
@@ -669,7 +693,14 @@ int main(int argc, char* argv[]) {
 
     verbose = config.verbose;
 
-    char* path = config.instance_file;
+    char* path = NULL;
+    if (strlen(config.input_dir) > 0) {
+        static char full_path[512];
+        snprintf(full_path, sizeof(full_path), "%s/%s", config.input_dir, config.instance_file);
+        path = full_path;
+    } else {
+        path = config.instance_file;
+    }
     int k = config.k_executions;
     int max_evals = config.max_evals;
     char* output_dir = config.output_dir;
@@ -728,7 +759,7 @@ int main(int argc, char* argv[]) {
         const char* voisinages[2] = {"Échange", "Insertion"};
         for (int v = 0; v < 2; v++) {
             char filepath[256];
-            sprintf(filepath, "%s/results_%s.txt", output_dir, v == 0 ? "echange" : "insertion");
+            sprintf(filepath, "%s/results_%s_%s_%d.txt", output_dir, v == 0 ? "echange" : "insertion", config.instance_file, config.k_executions);
             FILE* f = fopen(filepath, "w");
             if (f) {
                 fprintf(f, "# Résultats pour l'instance %s - Voisinage %s\n", config.instance_file, voisinages[v]);
@@ -743,7 +774,7 @@ int main(int argc, char* argv[]) {
 
         // Générer le script gnuplot
         char filepath[256];
-        sprintf(filepath, "%s/plot.gnuplot", output_dir);
+        sprintf(filepath, "%s/plot_%s_%d.gnuplot", output_dir, config.instance_file, config.k_executions);
         FILE* g = fopen(filepath, "w");
         if (g) {
             fprintf(g, "set terminal png size 800,600\n");
@@ -753,7 +784,7 @@ int main(int argc, char* argv[]) {
             fprintf(g, "set ylabel 'Coût moyen'\n");
             fprintf(g, "set xtics rotate by -45\n");
             fprintf(g, "set key outside\n");
-            fprintf(g, "plot '%s/results_echange.txt' using 2:xtic(1) title 'Échange' with linespoints, '%s/results_insertion.txt' using 2:xtic(1) title 'Insertion' with linespoints\n", output_dir, output_dir);
+            fprintf(g, "plot '%s/results_echange_%s_%d.txt' using 2:xtic(1) title 'Échange' with linespoints, '%s/results_insertion_%s_%d.txt' using 2:xtic(1) title 'Insertion' with linespoints\n", output_dir, config.instance_file, config.k_executions, output_dir, config.instance_file, config.k_executions);
             fclose(g);
         }
     }

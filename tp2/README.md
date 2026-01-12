@@ -100,7 +100,9 @@ make distclean
 | `-a, --algo TYPE` | Algorithme à exécuter : all, scalar, pareto | all |
 | `-v, --verbose` | Mode verbeux pour plus de détails | désactivé |
 | `--no-analyze` | Désactive l'analyse comparative | désactivé |
-| `--output-dir DIR` | Répertoire de sortie pour résultats | . |
+| `-od, --output-dir DIR` | Répertoire de sortie pour résultats | 
+| `-ip, --input-dir DIR` | Répertoire des instances | 
+| `-f, --instance-file FILE` | Nom de l'instance.
 
 ## 📊 Format des Instances
 
@@ -182,7 +184,10 @@ Le graphique généré montrera la comparaison des fronts Pareto des deux approc
 make test
 
 # Exécution sur instance test
-./mo -o 10 -p 2 -i 10 --no-analyze instances/7_5_01.txt
+./mo -o 10 -p 2 -i 10 --no-analyze -f instances/7_5_01.txt
+
+# Exécution sur instance test
+./mo -o 10 -p 2 -i 10 --no-analyze -f 7_5_01.txt -ip instances
 ```
 
 ## 🎯 Exemples d'utilisation
@@ -233,9 +238,3 @@ Ce projet est distribué sous licence MIT. Voir le fichier `LICENSE` pour plus d
 
 - Rémi Raoul
 - Basé sur le TP de la Mineure IA - Résolution de problèmes multi-objectif
-
-## 🙏 Remerciements
-
-- Enseignants de la mineure IA
-- Contributeurs open source
-- Communauté de recherche en optimisation combinatoire

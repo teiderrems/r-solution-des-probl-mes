@@ -5,7 +5,6 @@
  */
 
 #include "mflowshop.h"
-#include <unistd.h>
 
 /* === FONCTIONS UTILITAIRES POUR LES NOMS DE FICHIERS === */
 
@@ -965,12 +964,14 @@ void afficher_aide()
     printf("  -o, --offline N            Nombre de solutions pour le filtrage offline (defaut: 500)\n");
     printf("  -p, --poids N              Nombre de poids pour l'approche scalaire (defaut: 10)\n");
     printf("  -i, --iterations N         Nombre maximal d'iterations (defaut: 500)\n");
+    printf("  -id, --input-dir <dir>     Repertoire d'entree pour les instances (defaut: .)\n");
+    printf("  -f, --instance-file <file> Fichier d'instance (defaut: 7_5_01.txt)\n");
     printf("  -s, --size N               Taille initiale pour l'approche Pareto (defaut: 10)\n");
     printf("  -r, --runs N               Nombre d'executions pour les statistiques (defaut: 1)\n");
     printf("  -a, --algo TYPE            Algorithme a executer: all, scalar, pareto (defaut: all)\n");
     printf("  -v, --verbose              Mode verbeux pour plus de details\n");
     printf("  --no-analyze               Desactive l'analyse comparative\n");
-    printf("  --output-dir DIR           Repertoire de sortie pour les resultats (defaut: .)\n");
+    printf("  -od, --output-dir DIR           Repertoire de sortie pour les resultats (defaut: .)\n");
     printf("\nExemples:\n");
     printf("  ./tp_multiobj instance.txt\n");
     printf("  ./tp_multiobj -o 1000 -p 20 -i 500 instance.txt\n");
@@ -1006,6 +1007,30 @@ int parse_arguments(int argc, char *argv[], Config *config)
             afficher_aide();
             return 1;
         }
+        else if (strcmp(argv[i],"-f")==0 || strcmp(argv[i],"--instance-file")==0)
+        {
+            if (i + 1 < argc)
+            {
+                strcpy(config->instance_file, argv[++i]);
+            }
+            else
+            {
+                printf("Erreur: option -f ou --instance-file require une valeur\n");
+                return 1;
+            }
+        }
+        else if (strcmp(argv[i], "-id") == 0 || strcmp(argv[i], "--input-dir") == 0)
+        {
+            if (i + 1 < argc)
+            {
+                strcpy(config->input_dir, argv[++i]);
+            }
+            else
+            {
+                printf("Erreur: option -id ou --input-dir require une valeur\n");
+                return 1;
+            }
+        }
         else if (strcmp(argv[i], "-o") == 0 || strcmp(argv[i], "--offline") == 0)
         {
             if (i + 1 < argc)
@@ -1014,7 +1039,7 @@ int parse_arguments(int argc, char *argv[], Config *config)
             }
             else
             {
-                printf("Erreur: option -o require une valeur\n");
+                printf("Erreur: option -o ou --offline require une valeur\n");
                 return 1;
             }
         }
@@ -1026,7 +1051,7 @@ int parse_arguments(int argc, char *argv[], Config *config)
             }
             else
             {
-                printf("Erreur: option -p require une valeur\n");
+                printf("Erreur: option -p ou --poids require une valeur\n");
                 return 1;
             }
         }
@@ -1038,7 +1063,7 @@ int parse_arguments(int argc, char *argv[], Config *config)
             }
             else
             {
-                printf("Erreur: option -i require une valeur\n");
+                printf("Erreur: option -i ou --iterations require une valeur\n");
                 return 1;
             }
         }
@@ -1050,7 +1075,7 @@ int parse_arguments(int argc, char *argv[], Config *config)
             }
             else
             {
-                printf("Erreur: option -s require une valeur\n");
+                printf("Erreur: option -s ou --size require une valeur\n");
                 return 1;
             }
         }
@@ -1062,7 +1087,7 @@ int parse_arguments(int argc, char *argv[], Config *config)
             }
             else
             {
-                printf("Erreur: option -r require une valeur\n");
+                printf("Erreur: option -r ou --runs require une valeur\n");
                 return 1;
             }
         }
@@ -1074,7 +1099,7 @@ int parse_arguments(int argc, char *argv[], Config *config)
             }
             else
             {
-                printf("Erreur: option -a require une valeur\n");
+                printf("Erreur: option -a ou --algo require une valeur\n");
                 return 1;
             }
         }
@@ -1086,7 +1111,7 @@ int parse_arguments(int argc, char *argv[], Config *config)
         {
             config->no_analyze = 1;
         }
-        else if (strcmp(argv[i], "--output-dir") == 0)
+        else if (strcmp(argv[i], "--output-dir") == 0 || strcmp(argv[i], "-od") == 0)
         {
             if (i + 1 < argc)
             {
@@ -1094,7 +1119,7 @@ int parse_arguments(int argc, char *argv[], Config *config)
             }
             else
             {
-                printf("Erreur: option --output-dir require une valeur\n");
+                printf("Erreur: option --output-dir ou -od require une valeur\n");
                 return 1;
             }
         }
@@ -1193,6 +1218,13 @@ void generer_scripts_gnuplot(Config *config, int nb_runs)
         return;
     }
 
+    char abs_path[PATH_MAX];
+    if (realpath(config->output_dir, abs_path) == NULL) {
+        printf("Erreur: impossible de résoudre le chemin %s\n", config->output_dir);
+        fclose(script);
+        return;
+    }
+
     // En-tête du script gnuplot
     fprintf(script, "# ============================================\n");
     fprintf(script, "# Script gnuplot généré automatiquement\n");
@@ -1225,7 +1257,7 @@ void generer_scripts_gnuplot(Config *config, int nb_runs)
 
     // CORRECTION ICI : Supprimer le répertoire du chemin de sortie
     fprintf(script, "# Fichier de sortie\n");
-    fprintf(script, "set output '%s_front_comparaison.png'\n", prefix);
+    fprintf(script, "set output '%s/%s_front_comparaison.png'\n", abs_path, prefix);
     fprintf(script, "\n");
 
     // Commande de plot
@@ -1238,19 +1270,19 @@ void generer_scripts_gnuplot(Config *config, int nb_runs)
     // Front offline (référence)
     if (!first_plot)
         fprintf(script, ", ");
-    fprintf(script, "'%s_front_offline.dat' using 1:2 with points ls 3 title 'Filtrage Offline (référence)'", prefix);
+    fprintf(script, "'%s/%s_front_offline.dat' using 1:2 with points ls 3 title 'Filtrage Offline (référence)'", abs_path, prefix);
     first_plot = 0;
 
     // Fronts par run (scalaire et Pareto)
     for (int run = 1; run <= nb_runs; run++)
     {
         // Front scalaire
-        fprintf(script, ", '%s_front_scalaire_run_%d.dat' using 1:2 with points ls 1 title 'Scalaire Run %d'",
-                prefix, run, run);
+        fprintf(script, ", '%s/%s_front_scalaire_run_%d.dat' using 1:2 with points ls 1 title 'Scalaire Run %d'",
+                abs_path, prefix, run, run);
 
         // Front Pareto
-        fprintf(script, ", '%s_front_pareto_run_%d.dat' using 1:2 with points ls 2 title 'Pareto Run %d'",
-                prefix, run, run);
+        fprintf(script, ", '%s/%s_front_pareto_run_%d.dat' using 1:2 with points ls 2 title 'Pareto Run %d'",
+                abs_path, prefix, run, run);
     }
 
     fprintf(script, "\n\n");
@@ -1359,8 +1391,15 @@ void generer_graphique_hypervolume(Statistics *stats, int nb_runs, Config *confi
         return;
     }
 
+    char abs_path[PATH_MAX];
+    if (realpath(config->output_dir, abs_path) == NULL) {
+        printf("Erreur: impossible de résoudre le chemin %s\n", config->output_dir);
+        fclose(script);
+        return;
+    }
+
     fprintf(script, "set terminal pngcairo enhanced size 1200,600\n");
-    fprintf(script, "set output '%s_hypervolume_evolution.png'\n", prefix); // CORRECTION
+    fprintf(script, "set output '%s/%s_hypervolume_evolution.png'\n", abs_path, prefix);
     fprintf(script, "set title 'Évolution de l\\'hypervolume\\nInstance: %s (Iterations: %d, Pareto size: %d, %d runs)'\n",
             extraire_nom_base(config->instance_file), config->max_iterations, config->pareto_size, nb_runs);
     fprintf(script, "set xlabel 'Run'\n");
@@ -1371,8 +1410,8 @@ void generer_graphique_hypervolume(Statistics *stats, int nb_runs, Config *confi
     fprintf(script, "set style line 2 lc rgb '#dd181f' lw 2 pt 9 ps 1.5\n");
     fprintf(script, "set style line 3 lc rgb '#00ad60' lw 1 dt 2\n");
     fprintf(script, "\n");
-    fprintf(script, "plot '%s_hypervolume_evolution.dat' using 1:2 with linespoints ls 1 title 'Approche Scalaire', \\\n", prefix);
-    fprintf(script, "     '%s_hypervolume_evolution.dat' using 1:3 with linespoints ls 2 title 'Approche Pareto'\n", prefix);
+    fprintf(script, "plot '%s/%s_hypervolume_evolution.dat' using 1:2 with linespoints ls 1 title 'Approche Scalaire', \\\n", abs_path, prefix);
+    fprintf(script, "     '%s/%s_hypervolume_evolution.dat' using 1:3 with linespoints ls 2 title 'Approche Pareto'\n", abs_path, prefix);
 
     fclose(script);
 
@@ -1715,6 +1754,17 @@ int main(int argc, char *argv[])
 
     afficher_configuration(&config);
 
+    char instance_path[512];
+    // Construire le chemin complet de l'instance
+    if (strlen(config.input_dir) > 0)
+    {
+        snprintf(instance_path, sizeof(instance_path), "%s/%s", config.input_dir, config.instance_file);
+        strcpy(config.instance_file, instance_path);
+    }
+    else
+    {
+        strcpy(instance_path, config.instance_file);
+    }
     // Chargement de l'instance
     Instance *instance = lire_instance(config.instance_file);
     if (!instance)

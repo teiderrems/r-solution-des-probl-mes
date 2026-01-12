@@ -4,8 +4,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <time.h>
 #include <limits.h>
+#include <time.h>
+#include <unistd.h>
+#include <sys/stat.h>
 
 /**
  * @brief Structure représentant une instance du problème Flow Shop de permutation.
@@ -38,6 +40,7 @@ typedef struct {
     char output_dir[256];
     long seed;
     int verbose;
+    char input_dir[256];
 } Config;
 
 /* =============== Chargement et gestion mémoire =============== */

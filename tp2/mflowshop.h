@@ -13,6 +13,9 @@
 #include <time.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <unistd.h>
+#include <limits.h>
+#include <linux/limits.h>
 
 /* === CONSTANTES === */
 
@@ -79,6 +82,8 @@ typedef struct {
     int no_analyze;
     char output_dir[256];
     char algo_type[10];
+    int seed;
+    char input_dir[256];
 } Config;
 
 /**
