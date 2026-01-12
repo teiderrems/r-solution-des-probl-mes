@@ -24,19 +24,15 @@ test: $(TARGET)
 	@echo "Test avec arguments complets:"
 	./$(TARGET) -f 7_5_01.txt -id instances -o 100 -p 5 -i 50 -s 5 -r 2 -v -od test_results
 
-graphs:
-	@if command -v gnuplot >/dev/null; then \
-		for script in ./**/*.gnuplot; do \
-			if [ -f "$$script" ]; then \
-				gnuplot "$$script"; \
-			fi \
-		done; \
-		echo "Graphiques générés"; \
-	else \
-		echo "gnuplot non installé"; \
-	fi
+graphs: $(TARGET)
+	@echo "Génération des graphiques..."
+	@cd results && for script in *.gnuplot; do echo "Exécution de $$script"; gnuplot $$script; done
+
+experiment: $(TARGET)
+	@echo "Lancement de l'expérimentation sur toutes les instances..."
+	./$(TARGET) --experiment -od results -r 5 -od results -r 5
 
 clean:
 	rm -f $(OBJ) $(TARGET)
 
-.PHONY: all clean test graphs
+.PHONY: all clean test graphs experiment

@@ -32,7 +32,14 @@ gcc -Wall -Wextra -O2 -std=c99 fsp.c -o fsp -lm
 ```bash
 make test      # Test basique avec l'instance 7_5_01.txt
 make graphs    # Génère et affiche les graphiques pour 7_5_01.txt
+make experiment # Lance l'expérimentation sur toutes les instances avec différentes configurations
 ```
+
+**Mode expérimentation**:
+- Utiliser `make experiment` ou `./fsp --experiment` pour exécuter automatiquement les algorithmes sur toutes les instances disponibles avec diverses configurations de paramètres (`max_evals` et `k_executions`).
+- Les résultats sont sauvegardés dans `experiment_results_tp1.txt` avec moyennes et écarts-types.
+- Des scripts Gnuplot sont générés pour visualiser les comparaisons globales et par instance.
+- Nécessite Gnuplot pour générer les graphiques PNG.
 
 Options disponibles :
 - `-k, --executions <n>` : nombre d'exécutions à moyenner par algorithme (défaut : 10)

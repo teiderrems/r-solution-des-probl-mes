@@ -18,6 +18,10 @@ $(TARGET): $(OBJ)
 clean:
 	rm -f $(OBJ) $(TARGET)
 
+experiment: $(TARGET)
+	@echo "Lancement de l'expérimentation sur toutes les instances..."
+	./$(TARGET) --experiment -o results
+
 test: $(TARGET)
 	@echo "Test de l'aide:"
 	./$(TARGET) -h || true
@@ -26,7 +30,6 @@ test: $(TARGET)
 
 graphs: $(TARGET)
 	@echo "Génération des graphiques..."
-	./$(TARGET) -i instances -f 7_5_01.txt -k 5 -m 10000 -o results
-	@cd results && gnuplot plot_7_5_01.txt_5.gnuplot
+	@cd results && for script in *.gnuplot; do echo "Exécution de $$script"; gnuplot $$script; done
 
 .PHONY: all clean test graphs

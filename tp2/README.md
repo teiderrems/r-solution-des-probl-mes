@@ -68,6 +68,9 @@ make test
 # Générer les graphiques (dans le répertoire courant)
 make graphs
 
+# Lancer l'expérimentation sur toutes les instances
+make experiment
+
 # Nettoyer les fichiers de compilation
 make clean
 ```
@@ -98,6 +101,41 @@ make clean
 | `-od, --output-dir DIR` | Répertoire de sortie pour résultats | 
 | `-ip, --input-dir DIR` | Répertoire des instances | 
 | `-f, --instance-file FILE` | Nom de l'instance.
+
+## 🧪 Mode Expérimentation
+
+Le mode expérimentation permet d'exécuter automatiquement les algorithmes sur toutes les instances disponibles avec diverses configurations de paramètres (`max_iterations` et `pareto_size`).
+
+### Utilisation
+```bash
+# Via Makefile
+make experiment
+
+# Ou directement
+./mo --experiment
+```
+
+### Ce que fait le mode expérimentation
+- Parcourt toutes les instances dans le répertoire `instances/`
+- Teste différentes combinaisons de paramètres :
+  - `max_iterations` : 100, 500, 1000
+  - `pareto_size` : 5, 10, 20
+- Exécute les approches scalaire et Pareto pour chaque configuration
+- Calcule l'hypervolume moyen et génère des statistiques
+- Sauvegarde les résultats dans `experiment_results_tp2.txt`
+- Génère des scripts Gnuplot pour :
+  - Comparaison globale des hypervolumes
+  - Comparaison par instance
+  - Comparaison par configuration de paramètres
+  - Comparaison par instance et configuration
+
+### Fichiers générés en mode expérimentation
+- `experiment_results_tp2.txt` : Résultats tabulés avec moyennes d'hypervolume
+- Scripts Gnuplot pour visualisations automatiques :
+  - `experiment_plot_tp2.gnuplot` : Graphique global
+  - `[instance]_plot.gnuplot` : Graphique par instance
+  - `config_[max_iter]_[pareto_size]_plot.gnuplot` : Graphique par configuration
+  - `[instance]_max_iter_[max_iter]_pareto_size_[pareto_size]_plot.gnuplot` : Graphique par instance et config
 
 ## 📊 Format des Instances
 

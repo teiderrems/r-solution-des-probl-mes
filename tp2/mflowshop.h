@@ -16,6 +16,7 @@
 #include <unistd.h>
 #include <limits.h>
 #include <linux/limits.h>
+#include <dirent.h>
 
 /* === CONSTANTES === */
 
@@ -84,6 +85,7 @@ typedef struct {
     char algo_type[10];
     int seed;
     char input_dir[256];
+    int experiment;
 } Config;
 
 /**

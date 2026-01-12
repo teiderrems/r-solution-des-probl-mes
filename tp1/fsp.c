@@ -15,11 +15,13 @@ void afficher_aide() {
     printf("  -o, --output-dir <dir>  Répertoire de sortie (défaut: .)\n");
     printf("  -s, --seed <n>          Graine pour le générateur aléatoire (défaut: basée sur l'heure)\n");
     printf("  -v, --verbose           Mode verbeux\n");
+    printf("  --experiment            Exécuter l'expérimentation sur toutes les instances\n");
     printf("  -h, --help              Afficher cette aide\n\n");
     printf("Exemples:\n");
     printf("  fsp instances/20_10_01.txt\n");
     printf("  fsp -k 5 -m 50000 -o results instances/20_10_01.txt\n");
     printf("  fsp -v -s 12345 instances/7_5_01.txt\n");
+    printf("  fsp --experiment -o results\n");
 }
 
 int parse_arguments(int argc, char *argv[], Config *config) {
@@ -29,7 +31,9 @@ int parse_arguments(int argc, char *argv[], Config *config) {
     config->max_evals = 10000;
     config->verbose = 0;
     strcpy(config->output_dir, ".");
+    strcpy(config->input_dir, "");
     config->seed = -1;
+    config->experiment = 0;
 
     // Vérification des arguments
     if (argc < 2) {
@@ -102,6 +106,12 @@ int parse_arguments(int argc, char *argv[], Config *config) {
         else if (strcmp(argv[i], "-v") == 0 || strcmp(argv[i], "--verbose") == 0) {
             config->verbose = 1;
         }
+        else if (strcmp(argv[i], "--experiment") == 0) {
+            config->experiment = 1;
+        }
+        else if (argv[i][0] != '-') {
+            strcpy(config->instance_file, argv[i]);
+        }
         else {
             printf("Erreur: option inconnue '%s'\n", argv[i]);
             afficher_aide();
@@ -110,7 +120,7 @@ int parse_arguments(int argc, char *argv[], Config *config) {
     }
 
     // Vérification du fichier d'instance
-    if (strlen(config->instance_file) == 0) {
+    if (!config->experiment && strlen(config->instance_file) == 0) {
         printf("Erreur: nom de fichier d'instance manquant\n");
         afficher_aide();
         return 1;
@@ -683,12 +693,177 @@ int* algorithme_perso_2(Instance* inst, int max_evals, int* best_cost, int use_i
     return global_best;
 }
 
+/* =============== Fonction d'expérimentation =============== */
+
+void experiment_all_instances(Config *config) {
+    DIR *dir;
+    struct dirent *entry;
+    char instance_dir[512];
+    if (strlen(config->input_dir) > 0) {
+        strcpy(instance_dir, config->input_dir);
+    } else {
+        strcpy(instance_dir, "instances");
+    }
+
+    dir = opendir(instance_dir);
+    if (!dir) {
+        fprintf(stderr, "Erreur: impossible d'ouvrir le répertoire %s\n", instance_dir);
+        return;
+    }
+
+    // Ouvrir le fichier de résultats
+    char result_file[512];
+    sprintf(result_file, "%s/experiment_results.txt", config->output_dir);
+    FILE *f = fopen(result_file, "w");
+    if (!f) {
+        fprintf(stderr, "Erreur: impossible de créer le fichier %s\n", result_file);
+        closedir(dir);
+        return;
+    }
+
+    fprintf(f, "# Résultats de l'expérimentation\n");
+    fprintf(f, "# Instance\tMaxEvals\tAlgo\tVoisinage\tCoûtMoyen\tTempsMoyen(s)\n");
+
+    // Paramètres à tester
+    int max_evals_list[] = {1000, 5000, 10000};
+    int num_max_evals = 3;
+    int k = config->k_executions; // utiliser la valeur de config
+
+    struct {
+        char* name;
+        int* (*func)(Instance*, int, int*, int);
+    } algos[] = {
+        {"Marche aléatoire", marche_aleatoire},
+        {"Climber First", climber_first_safe},
+        {"Climber Best", climber_best},
+        {"Mon algorithme", algorithme_perso},
+        {"Mon algorithme v2", algorithme_perso_2}
+    };
+
+    while ((entry = readdir(dir)) != NULL) {
+        if (strstr(entry->d_name, ".txt") != NULL) {
+            char path[512];
+            sprintf(path, "%s/%s", instance_dir, entry->d_name);
+
+            Instance* inst = load_instance(path);
+            if (!inst) {
+                fprintf(stderr, "Erreur: impossible de charger %s\n", path);
+                continue;
+            }
+
+            printf("Traitement de l'instance %s\n", entry->d_name);
+
+            srand(config->seed == -1 ? time(NULL) : config->seed);
+
+            for (int m = 0; m < num_max_evals; m++) {
+                int max_evals = max_evals_list[m];
+
+                for (int use_insert = 0; use_insert <= 1; use_insert++) {
+                    const char* voisinage = use_insert ? "Insertion" : "Échange";
+
+                    for (int a = 0; a < 5; a++) {
+                        double sum_cost = 0.0;
+                        double sum_time = 0.0;
+                        for (int run = 0; run < k; run++) {
+                            int cost;
+                            clock_t start = clock();
+                            int* sol = algos[a].func(inst, max_evals, &cost, use_insert);
+                            clock_t end = clock();
+                            sum_time += (double)(end - start) / CLOCKS_PER_SEC;
+                            sum_cost += cost;
+                            free(sol);
+                        }
+                        double avg_cost = sum_cost / k;
+                        double avg_time = sum_time / k;
+                        fprintf(f, "%s\t%d\t%s\t%s\t%.2f\t%.3f\n", entry->d_name, max_evals, algos[a].name, voisinage, avg_cost, avg_time);
+                    }
+                }
+            }
+
+            free_memory(inst);
+
+            // Générer le script gnuplot pour cette instance
+            const char* algos_names[] = {"Marche aléatoire", "Climber First", "Climber Best", "Mon algorithme", "Mon algorithme v2"};
+            const char* voisinages[] = {"Échange", "Insertion"};
+            char instance_gnuplot[512];
+            sprintf(instance_gnuplot, "%s/%s_plot.gnuplot", config->output_dir, entry->d_name);
+            FILE *ig = fopen(instance_gnuplot, "w");
+            if (ig) {
+                fprintf(ig, "set terminal png size 800,600\n");
+                fprintf(ig, "set output '%s_results.png'\n", entry->d_name);
+                fprintf(ig, "set title 'Instance %s - Coût moyen vs Max Evals'\n", entry->d_name);
+                fprintf(ig, "set xlabel 'Max Evals'\n");
+                fprintf(ig, "set ylabel 'Coût moyen'\n");
+                fprintf(ig, "set key outside\n");
+                fprintf(ig, "set datafile separator \"\\t\"\n");
+                fprintf(ig, "set datafile commentschars \"#\"\n");
+                fprintf(ig, "set xrange [0:11000]\n");
+                fprintf(ig, "set yrange [0:*]\n");
+                fprintf(ig, "plot ");
+                int plot_count = 0;
+                for (int a = 0; a < 5; a++) {
+                    for (int v = 0; v < 2; v++) {
+                        fprintf(ig, "'experiment_results.txt' using (stringcolumn(1) eq \"%s\" && stringcolumn(3) eq \"%s\" && stringcolumn(4) eq \"%s\" ? column(2) : 1/0):5 with linespoints lc %d title \"%s %s\"", entry->d_name, algos_names[a], voisinages[v], (a*2 + v + 1), algos_names[a], voisinages[v]);
+                        plot_count++;
+                        if (plot_count < 10) fprintf(ig, ", ");
+                    }
+                }
+                fprintf(ig, "\n");
+                fclose(ig);
+                printf("Script gnuplot pour %s créé : %s\n", entry->d_name, instance_gnuplot);
+            }
+        }
+    }
+
+    fclose(f);
+    closedir(dir);
+    printf("Expérimentation terminée. Résultats dans %s\n", result_file);
+
+    // Générer le script gnuplot pour la visualisation
+    char gnuplot_file[512];
+    sprintf(gnuplot_file, "%s/experiment_plot.gnuplot", config->output_dir);
+    FILE *g = fopen(gnuplot_file, "w");
+    if (g) {
+        fprintf(g, "set terminal png size 1200,800\n");
+        fprintf(g, "set output 'experiment_results.png'\n");
+        fprintf(g, "set title 'Expérimentation - Coût moyen vs Max Evals'\n");
+        fprintf(g, "set xlabel 'Max Evals'\n");
+        fprintf(g, "set ylabel 'Coût moyen'\n");
+        fprintf(g, "set key outside\n");
+        fprintf(g, "set datafile separator \"\\t\"\n");
+        fprintf(g, "set datafile commentschars \"#\"\n");
+        fprintf(g, "set xrange [0:11000]\n");
+        fprintf(g, "set yrange [0:*]\n");
+        // Plot avec filtres pour chaque combinaison
+        const char* algos_names[] = {"Marche aléatoire", "Climber First", "Climber Best", "Mon algorithme", "Mon algorithme v2"};
+        const char* voisinages[] = {"Échange", "Insertion"};
+        fprintf(g, "plot ");
+        int total_plots = 5 * 2;
+        int plot_count = 0;
+        for (int a = 0; a < 5; a++) {
+            for (int v = 0; v < 2; v++) {
+                fprintf(g, "'experiment_results.txt' using (stringcolumn(3) eq \"%s\" && stringcolumn(4) eq \"%s\" ? column(2) : 1/0):5 with linespoints lc %d title \"%s %s\"", algos_names[a], voisinages[v], (a*2 + v + 1), algos_names[a], voisinages[v]);
+                plot_count++;
+                if (plot_count < total_plots) fprintf(g, ", ");
+            }
+        }
+        fprintf(g, "\n");
+        fclose(g);
+        printf("Script gnuplot créé : %s\n", gnuplot_file);
+    }
+}
+
 /* =============== Question 9 =============== */
 
 int main(int argc, char* argv[]) {
     Config config;
     if (parse_arguments(argc, argv, &config) != 0) {
         return EXIT_FAILURE;
+    }
+
+    if (config.experiment) {
+        experiment_all_instances(&config);
+        return EXIT_SUCCESS;
     }
 
     verbose = config.verbose;
@@ -785,6 +960,7 @@ int main(int argc, char* argv[]) {
             fprintf(g, "set xtics rotate by -45\n");
             fprintf(g, "set key outside\n");
             fprintf(g, "set datafile separator \"\\t\"\n");
+            fprintf(g, "set datafile commentschars \"#\"\n");
             fprintf(g, "plot 'results_echange_%s_%d.txt' using 0:2:xtic(1) title 'Échange' with linespoints, 'results_insertion_%s_%d.txt' using 0:2:xtic(1) title 'Insertion' with linespoints\n", config.instance_file, config.k_executions, config.instance_file, config.k_executions);
             fclose(g);
         }

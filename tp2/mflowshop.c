@@ -972,16 +972,19 @@ void afficher_aide()
     printf("  -v, --verbose              Mode verbeux pour plus de details\n");
     printf("  --no-analyze               Desactive l'analyse comparative\n");
     printf("  -od, --output-dir DIR           Repertoire de sortie pour les resultats (defaut: .)\n");
+    printf("  --experiment               Executer l'experimentation sur toutes les instances\n");
     printf("\nExemples:\n");
     printf("  ./tp_multiobj instance.txt\n");
     printf("  ./tp_multiobj -o 1000 -p 20 -i 500 -f instance.txt\n");
     printf("  ./tp_multiobj --algo scalar --iterations 2000 -f instance.txt\n");
+    printf("  ./tp_multiobj --experiment -od results\n");
 }
 
 int parse_arguments(int argc, char *argv[], Config *config)
 {
     // Valeurs par défaut MODIFIÉES pour être plus raisonnables
     strcpy(config->instance_file, "");
+    strcpy(config->input_dir, "");
     config->offline_solutions = 500;
     config->nb_poids = 10;
     config->max_iterations = 500; // Réduit de 1000 à 500
@@ -991,6 +994,8 @@ int parse_arguments(int argc, char *argv[], Config *config)
     config->no_analyze = 0;
     strcpy(config->output_dir, ".");
     strcpy(config->algo_type, "all");
+    config->seed = 0;
+    config->experiment = 0;
 
     // Vérification des arguments
     if (argc < 2)
@@ -1111,6 +1116,10 @@ int parse_arguments(int argc, char *argv[], Config *config)
         {
             config->no_analyze = 1;
         }
+        else if (strcmp(argv[i], "--experiment") == 0)
+        {
+            config->experiment = 1;
+        }
         else if (strcmp(argv[i], "--output-dir") == 0 || strcmp(argv[i], "-od") == 0)
         {
             if (i + 1 < argc)
@@ -1131,7 +1140,7 @@ int parse_arguments(int argc, char *argv[], Config *config)
     }
 
     // Vérification du fichier d'instance
-    if (strlen(config->instance_file) == 0)
+    if (!config->experiment && strlen(config->instance_file) == 0)
     {
         printf("Erreur: nom de fichier d'instance manquant\n");
         afficher_aide();
@@ -1739,6 +1748,275 @@ void executer_experimentation(Instance *instance, Config *config)
     }
 }
 
+/* =============== Fonction d'expérimentation =============== */
+
+void experiment_all_instances(Config *config) {
+    DIR *dir;
+    struct dirent *entry;
+    char instance_dir[512];
+    if (strlen(config->input_dir) > 0) {
+        strcpy(instance_dir, config->input_dir);
+    } else {
+        strcpy(instance_dir, "instances");
+    }
+
+    printf("Instance dir: '%s'\n", instance_dir);
+
+    dir = opendir(instance_dir);
+    if (!dir) {
+        fprintf(stderr, "Erreur: impossible d'ouvrir le répertoire %s\n", instance_dir);
+        return;
+    }
+
+    // Ouvrir le fichier de résultats
+    char result_file[512];
+    sprintf(result_file, "%s/experiment_results_tp2.txt", config->output_dir);
+    FILE *f = fopen(result_file, "w");
+    if (!f) {
+        fprintf(stderr, "Erreur: impossible de créer le fichier %s\n", result_file);
+        closedir(dir);
+        return;
+    }
+
+    fprintf(f, "# Résultats de l'expérimentation TP2\n");
+    fprintf(f, "# Instance\tMaxIter\tParetoSize\tAlgo\tHypervolume\tSolutions\tTemps(s)\n");
+
+    // Paramètres à tester
+    int max_iter_list[] = {100, 500, 1000};
+    int pareto_size_list[] = {5, 10, 20};
+    int num_max_iter = 3;
+    int num_pareto_size = 3;
+    int runs = config->nb_runs; // utiliser la valeur de config
+
+    const char* algos[] = {"scalar", "pareto"};
+
+    while ((entry = readdir(dir)) != NULL) {
+        if (strstr(entry->d_name, ".txt") != NULL) {
+            char path[512];
+            sprintf(path, "%s/%s", instance_dir, entry->d_name);
+
+            Instance* inst = lire_instance(path);
+            if (!inst) {
+                fprintf(stderr, "Erreur: impossible de charger %s\n", path);
+                continue;
+            }
+
+            printf("Traitement de l'instance %s\n", entry->d_name);
+
+            srand(config->seed == 0 ? time(NULL) : config->seed);
+
+            for (int m = 0; m < num_max_iter; m++) {
+                int max_iter = max_iter_list[m];
+                for (int p = 0; p < num_pareto_size; p++) {
+                    int pareto_size = pareto_size_list[p];
+
+                    for (int a = 0; a < 2; a++) {
+                        const char* algo = algos[a];
+                        double sum_hyper = 0.0;
+                        int sum_sol = 0;
+                        double sum_time = 0.0;
+                        int valid_runs = 0;
+
+                        for (int run = 0; run < runs; run++) {
+                            // Créer des archives temporaires
+                            Archive *archive = NULL;
+                            Statistics stats = {0};
+                            clock_t debut = clock();
+
+                            if (strcmp(algo, "scalar") == 0) {
+                                archive = approche_scalaire(inst, config->nb_poids, max_iter, config);
+                                stats.solutions_scalar = archive->size;
+                                stats.time_scalar = (double)(clock() - debut) / CLOCKS_PER_SEC;
+                                // Calculer hypervolume
+                                double ref_makespan = 0, ref_tardiness = 0;
+                                for (int i = 0; i < 50; i++) { // moins pour vitesse
+                                    int *perm = generer_solution_aleatoire(inst->nb_jobs);
+                                    ObjectiveVector sol = evaluer_solution(inst, perm);
+                                    if (sol.makespan > ref_makespan) ref_makespan = sol.makespan;
+                                    if (sol.tardiness > ref_tardiness) ref_tardiness = sol.tardiness;
+                                    free(perm);
+                                }
+                                ref_makespan *= 1.1;
+                                ref_tardiness *= 1.1;
+                                stats.hypervolume_scalar = calculer_hypervolume(archive, ref_makespan, ref_tardiness);
+                            } else if (strcmp(algo, "pareto") == 0) {
+                                archive = approche_pareto(inst, pareto_size, max_iter, config);
+                                stats.solutions_pareto = archive->size;
+                                stats.time_pareto = (double)(clock() - debut) / CLOCKS_PER_SEC;
+                                // Calculer hypervolume
+                                double ref_makespan = 0, ref_tardiness = 0;
+                                for (int i = 0; i < 50; i++) {
+                                    int *perm = generer_solution_aleatoire(inst->nb_jobs);
+                                    ObjectiveVector sol = evaluer_solution(inst, perm);
+                                    if (sol.makespan > ref_makespan) ref_makespan = sol.makespan;
+                                    if (sol.tardiness > ref_tardiness) ref_tardiness = sol.tardiness;
+                                    free(perm);
+                                }
+                                ref_makespan *= 1.1;
+                                ref_tardiness *= 1.1;
+                                stats.hypervolume_pareto = calculer_hypervolume(archive, ref_makespan, ref_tardiness);
+                            }
+
+                            if (archive) {
+                                liberer_archive(archive);
+                            }
+
+                            // Accumuler
+                            if (strcmp(algo, "scalar") == 0) {
+                                sum_hyper += stats.hypervolume_scalar;
+                                sum_sol += stats.solutions_scalar;
+                                sum_time += stats.time_scalar;
+                            } else {
+                                sum_hyper += stats.hypervolume_pareto;
+                                sum_sol += stats.solutions_pareto;
+                                sum_time += stats.time_pareto;
+                            }
+                            valid_runs++;
+                        }
+
+                        double avg_hyper = sum_hyper / valid_runs;
+                        double avg_sol = (double)sum_sol / valid_runs;
+                        double avg_time = sum_time / valid_runs;
+
+                        fprintf(f, "%s\t%d\t%d\t%s\t%.2f\t%.1f\t%.3f\n", entry->d_name, max_iter, pareto_size, algo, avg_hyper, avg_sol, avg_time);
+                    }
+                }
+            }
+
+            liberer_instance(inst);
+
+            // Générer le script gnuplot pour cette instance
+            const char* algos[] = {"scalar", "pareto"};
+            char instance_gnuplot[512];
+            sprintf(instance_gnuplot, "%s/%s_plot.gnuplot", config->output_dir, entry->d_name);
+            FILE *ig = fopen(instance_gnuplot, "w");
+            if (ig) {
+                fprintf(ig, "set terminal png size 800,600\n");
+                fprintf(ig, "set output '%s_results.png'\n", entry->d_name);
+                fprintf(ig, "set title 'Instance %s - Hypervolume vs Max Iterations'\n", entry->d_name);
+                fprintf(ig, "set xlabel 'Max Iterations'\n");
+                fprintf(ig, "set ylabel 'Hypervolume moyen'\n");
+                fprintf(ig, "set key outside\n");
+                fprintf(ig, "set datafile separator \"\\t\"\n");
+                fprintf(ig, "set datafile commentschars \"#\"\n");
+                fprintf(ig, "set xrange [0:1200]\n");
+                fprintf(ig, "set yrange [0:*]\n");
+                fprintf(ig, "plot ");
+                int plot_count = 0;
+                for (int p = 0; p < 3; p++) {
+                    int pareto_size = (p == 0 ? 5 : (p == 1 ? 10 : 20));
+                    for (int a = 0; a < 2; a++) {
+                        const char* algo = algos[a];
+                        fprintf(ig, "'experiment_results_tp2.txt' using (stringcolumn(1) eq \"%s\" && stringcolumn(4) eq \"%s\" && column(3) == %d ? column(2) : 1/0):5 with linespoints lc %d title \"%s ParetoSize %d\"", entry->d_name, algo, pareto_size, (p*2 + a + 1), algo, pareto_size);
+                        plot_count++;
+                        if (plot_count < 6) fprintf(ig, ", ");
+                    }
+                }
+                fprintf(ig, "\n");
+                fclose(ig);
+                printf("Script gnuplot pour %s créé : %s\n", entry->d_name, instance_gnuplot);
+            }
+        }
+    }
+
+    // Générer des scripts gnuplot pour chaque configuration de paramètres
+    const char* instances[] = {"7_5_01.txt", "20_10_01.txt", "20_20_01.txt", "30_10_01.txt", "30_20_01.txt", "50_10_01.txt", "50_20_01.txt"};
+    int num_instances = 7;
+    for (int m = 0; m < 3; m++) {
+        int max_iter = max_iter_list[m];
+        for (int p = 0; p < 3; p++) {
+            int pareto_size = pareto_size_list[p];
+            char config_gnuplot[512];
+            sprintf(config_gnuplot, "%s/config_%d_%d_plot.gnuplot", config->output_dir, max_iter, pareto_size);
+            FILE *cg = fopen(config_gnuplot, "w");
+            if (cg) {
+                fprintf(cg, "set terminal png size 800,600\n");
+                fprintf(cg, "set output 'hypervolume_vs_instance_max_iter_%d_pareto_size_%d.png'\n", max_iter, pareto_size);
+                fprintf(cg, "set title 'Config MaxIter %d, ParetoSize %d - Hypervolume vs Instance'\n", max_iter, pareto_size);
+                fprintf(cg, "set xlabel 'Instance'\n");
+                fprintf(cg, "set ylabel 'Hypervolume moyen'\n");
+                fprintf(cg, "set key outside\n");
+                fprintf(cg, "set datafile separator \"\\t\"\n");
+                fprintf(cg, "set datafile commentschars \"#\"\n");
+                fprintf(cg, "set xtics rotate by -45\n");
+                fprintf(cg, "set xtics (\"7_5_01.txt\" 1, \"20_10_01.txt\" 2, \"20_20_01.txt\" 3, \"30_10_01.txt\" 4, \"30_20_01.txt\" 5, \"50_10_01.txt\" 6, \"50_20_01.txt\" 7)\n");
+                fprintf(cg, "set yrange [0:*]\n");
+                fprintf(cg, "plot ");
+                int plot_count = 0;
+                for (int a = 0; a < 2; a++) {
+                    const char* algo = algos[a];
+                    fprintf(cg, "'experiment_results_tp2.txt' using (column(2) == %d && column(3) == %d && stringcolumn(4) eq \"%s\" ? (stringcolumn(1) eq \"7_5_01.txt\" ? 1 : stringcolumn(1) eq \"20_10_01.txt\" ? 2 : stringcolumn(1) eq \"20_20_01.txt\" ? 3 : stringcolumn(1) eq \"30_10_01.txt\" ? 4 : stringcolumn(1) eq \"30_20_01.txt\" ? 5 : stringcolumn(1) eq \"50_10_01.txt\" ? 6 : stringcolumn(1) eq \"50_20_01.txt\" ? 7 : 1/0) : 1/0):5 with linespoints lc %d title \"%s\"", max_iter, pareto_size, algo, (a + 1), algo);
+                    plot_count++;
+                    if (plot_count < 2) fprintf(cg, ", ");
+                }
+                fprintf(cg, "\n");
+                fclose(cg);
+                printf("Script gnuplot pour config %d %d créé : %s\n", max_iter, pareto_size, config_gnuplot);
+            }
+        }
+    }
+
+    // Générer scripts pour chaque instance et config
+    for (int i = 0; i < num_instances; i++) {
+        const char* instance = instances[i];
+        for (int m = 0; m < 3; m++) {
+            int max_iter = (m == 0 ? 100 : (m == 1 ? 500 : 1000));
+            for (int p = 0; p < 3; p++) {
+                int pareto_size = (p == 0 ? 5 : (p == 1 ? 10 : 20));
+                char instance_config_gnuplot[1024];
+                sprintf(instance_config_gnuplot, "%s/%s_max_iter_%d_pareto_size_%d_plot.gnuplot", config->output_dir, instance, max_iter, pareto_size);
+                FILE *icg = fopen(instance_config_gnuplot, "w");
+                if (icg) {
+                    fprintf(icg, "set terminal png size 800,600\n");
+                    fprintf(icg, "set output '%s_max_iter_%d_pareto_size_%d.png'\n", instance, max_iter, pareto_size);
+                    fprintf(icg, "set title 'Instance %s, MaxIter %d, ParetoSize %d - Hypervolume'\n", instance, max_iter, pareto_size);
+                    fprintf(icg, "set xlabel 'Algorithm'\n");
+                    fprintf(icg, "set ylabel 'Hypervolume'\n");
+                    fprintf(icg, "set xtics ('scalar' 1, 'pareto' 2)\n");
+                    fprintf(icg, "plot 'experiment_results_tp2.txt' using (stringcolumn(1) eq \"%s\" && $2 == %d && $3 == %d && stringcolumn(4) eq \"scalar\" ? 1 : 1/0):5 with points pt 7 lc 1 title \"scalar\", 'experiment_results_tp2.txt' using (stringcolumn(1) eq \"%s\" && $2 == %d && $3 == %d && stringcolumn(4) eq \"pareto\" ? 2 : 1/0):5 with points pt 7 lc 2 title \"pareto\"\n", instance, max_iter, pareto_size, instance, max_iter, pareto_size);
+                    fclose(icg);
+                    printf("Script gnuplot pour instance %s, config %d %d créé : %s\n", instance, max_iter, pareto_size, instance_config_gnuplot);
+                }
+            }
+        }
+    }
+
+    fclose(f);
+    closedir(dir);
+    printf("Expérimentation terminée. Résultats dans %s\n", result_file);
+
+    // Générer le script gnuplot
+    char gnuplot_file[512];
+    sprintf(gnuplot_file, "%s/experiment_plot_tp2.gnuplot", config->output_dir);
+    FILE *g = fopen(gnuplot_file, "w");
+    if (g) {
+        fprintf(g, "set terminal png size 1200,800\n");
+        fprintf(g, "set output 'experiment_results_tp2.png'\n");
+        fprintf(g, "set title 'Expérimentation TP2 - Hypervolume vs Max Iterations'\n");
+        fprintf(g, "set xlabel 'Max Iterations'\n");
+        fprintf(g, "set ylabel 'Hypervolume moyen'\n");
+        fprintf(g, "set key outside\n");
+        fprintf(g, "set datafile separator \"\\t\"\n");
+        fprintf(g, "set datafile commentschars \"#\"\n");
+        fprintf(g, "set xrange [0:1200]\n");
+        fprintf(g, "set yrange [0:*]\n");
+        fprintf(g, "plot ");
+        int plot_count = 0;
+        for (int p = 0; p < num_pareto_size; p++) {
+            int pareto_size = pareto_size_list[p];
+            for (int a = 0; a < 2; a++) {
+                const char* algo = algos[a];
+                fprintf(g, "'experiment_results_tp2.txt' using (stringcolumn(4) eq \"%s\" && column(3) == %d ? column(2) : 1/0):5 with linespoints lc %d title \"%s ParetoSize %d\"", algo, pareto_size, (p*2 + a + 1), algo, pareto_size);
+                plot_count++;
+                if (plot_count < 6) fprintf(g, ", ");
+            }
+        }
+        fprintf(g, "\n");
+        fclose(g);
+        printf("Script gnuplot créé : %s\n", gnuplot_file);
+    }
+}
+
 /* === POINT D'ENTRÉE PRINCIPAL === */
 
 int main(int argc, char *argv[])
@@ -1750,6 +2028,11 @@ int main(int argc, char *argv[])
     if (parse_arguments(argc, argv, &config) != 0)
     {
         return EXIT_FAILURE;
+    }
+
+    if (config.experiment) {
+        experiment_all_instances(&config);
+        return EXIT_SUCCESS;
     }
 
     afficher_configuration(&config);
