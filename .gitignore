@@ -1,1 +1,10 @@
 .vscode
+test_results/
+/*/**/results_*/
+*.o
+*.out
+*.exe
+*.log
+*.dat
+*.png
+*.gpi

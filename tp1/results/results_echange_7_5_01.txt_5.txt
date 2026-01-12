@@ -1,0 +1,8 @@
+# Résultats pour l'instance 7_5_01.txt - Voisinage Échange
+# k_executions=5, max_evals=10000, seed=-1
+# Algorithme	Coût moyen	Temps moyen (s)
+Marche aléatoire	665.00	0.009
+Climber First	671.20	0.000
+Climber Best	672.80	0.000
+Mon algorithme	674.80	0.000
+Mon algorithme v2	669.40	0.000

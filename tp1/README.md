@@ -8,18 +8,30 @@
 - `instances/` : exemples d'instances (format Taillard) utilisées pour les tests.
 
 **Compilation**:
-- Depuis le répertoire `tp1/`, compiler avec GCC :
+- Depuis le répertoire `tp1/`, utiliser le Makefile minimaliste :
 
-```
-gcc -fdiagnostics-color=always -g fsp.c -o fsp
+```bash
+make          # Compile le programme
+make clean    # Nettoie les fichiers compilés
+make test     # Teste l'aide et exécute un exemple simple
+make graphs   # Génère les données et le graphique PNG
 ```
 
-(La tâche VS Code fournie dans l'espace de travail utilise une commande similaire.)
+Ou compiler manuellement avec GCC :
+```bash
+gcc -Wall -Wextra -O2 -std=c99 fsp.c -o fsp -lm
+```
 
 **Exécution**:
 
-```
+```bash
 ./fsp [OPTIONS] <instance_file>
+```
+
+**Utilisation rapide avec le Makefile**:
+```bash
+make test      # Test basique avec l'instance 7_5_01.txt
+make graphs    # Génère et affiche les graphiques pour 7_5_01.txt
 ```
 
 Options disponibles :
@@ -46,13 +58,20 @@ Le programme lance les algorithmes pour les deux voisinages (`Échange` et `Inse
 
 Si un répertoire de sortie est spécifié (`-o`), le programme sauvegarde les résultats dans des fichiers texte et génère un script Gnuplot pour visualiser la comparaison des algorithmes.
 
+**Génération de graphiques**:
+- Utiliser `make graphs` pour générer automatiquement un graphique PNG comparant les performances des algorithmes
+- Le graphique est sauvegardé dans `results/results_[instance]_[k].png`
+- Nécessite l'installation de Gnuplot : `sudo apt install gnuplot` (Ubuntu/Debian)
+
 **Nouvelles fonctionnalités (v1.1)**:
+- **Makefile minimaliste** : Cibles `make`, `make clean`, `make test`, `make graphs`
 - **Mode verbeux** (`-v`) : Affiche l'instance chargée et les solutions intermédiaires pour chaque exécution
 - **Mesure du temps d'exécution** : Affiche le temps moyen d'exécution pour chaque algorithme
 - **Arguments nommés modernes** : Interface avec options longues (`--executions`) et courtes (`-k`)
 - **Sauvegarde automatique des résultats** : Génération de fichiers texte et scripts Gnuplot
 - **Configuration structurée** : Parsing robuste avec validation, valeurs par défaut et aide intégrée
 - **Création automatique de répertoires** : Le répertoire de sortie est créé si nécessaire
+- **Génération automatique de graphiques** : Scripts Gnuplot intégrés pour visualisation
 
 **Algorithmes implémentés**:
 - Marche aléatoire (`marche_aleatoire`)

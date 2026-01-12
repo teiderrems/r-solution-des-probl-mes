@@ -778,13 +778,14 @@ int main(int argc, char* argv[]) {
         FILE* g = fopen(filepath, "w");
         if (g) {
             fprintf(g, "set terminal png size 800,600\n");
-            fprintf(g, "set output '%s/results.png'\n", output_dir);
+            fprintf(g, "set output 'results_%s_%d.png'\n", config.instance_file, config.k_executions);
             fprintf(g, "set title 'Comparaison des algorithmes - Instance %s'\n", config.instance_file);
             fprintf(g, "set xlabel 'Algorithme'\n");
             fprintf(g, "set ylabel 'Coût moyen'\n");
             fprintf(g, "set xtics rotate by -45\n");
             fprintf(g, "set key outside\n");
-            fprintf(g, "plot '%s/results_echange_%s_%d.txt' using 2:xtic(1) title 'Échange' with linespoints, '%s/results_insertion_%s_%d.txt' using 2:xtic(1) title 'Insertion' with linespoints\n", output_dir, config.instance_file, config.k_executions, output_dir, config.instance_file, config.k_executions);
+            fprintf(g, "set datafile separator \"\\t\"\n");
+            fprintf(g, "plot 'results_echange_%s_%d.txt' using 0:2:xtic(1) title 'Échange' with linespoints, 'results_insertion_%s_%d.txt' using 0:2:xtic(1) title 'Insertion' with linespoints\n", config.instance_file, config.k_executions, config.instance_file, config.k_executions);
             fclose(g);
         }
     }

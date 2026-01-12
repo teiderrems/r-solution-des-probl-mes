@@ -22,7 +22,7 @@ Ce projet résout le problème FSP avec deux objectifs à minimiser :
 
 ```
 .
-├── Makefile              # Fichier de compilation et gestion du projet
+├── Makefile              # Makefile minimaliste pour compilation
 ├── mflowshop.c          # Code source principal
 ├── mflowshop.h          # En-tête avec déclarations
 ├── instances/           # Répertoire des instances de test
@@ -47,14 +47,11 @@ sudo apt install gcc make gnuplot
 
 ### Compilation
 ```bash
-# Configuration initiale
-make setup
-
-# Compilation standard
+# Compilation simple
 make
 
-# Compilation en mode debug
-make debug
+# Nettoyer les fichiers de compilation
+make clean
 ```
 
 ## 🚀 Utilisation
@@ -62,29 +59,27 @@ make debug
 ### Commandes de base
 
 ```bash
-# Afficher l'aide
-make help
+# Compiler le programme
+make
 
-# Tester rapidement
+# Tester rapidement avec différents arguments
 make test
 
-# Exécuter sur une instance
-make run INSTANCE=instances/7_5_01.txt
-
-# Exécuter avec paramètres personnalisés
-make run INSTANCE=instances/20_10_01.txt ARGS="-o 1000 -p 20 -i 500 -v"
-
-# Exécuter sur toutes les instances
-make run-all ARGS="-o 500 -p 10 -i 200"
-
-# Générer les graphiques (après exécution)
+# Générer les graphiques (dans le répertoire courant)
 make graphs
 
 # Nettoyer les fichiers de compilation
 make clean
+```
 
-# Nettoyage complet (incluant les résultats)
-make distclean
+### Exécution manuelle
+
+```bash
+# Exécution simple
+./mo -f instances/7_5_01.txt
+
+# Avec tous les arguments
+./mo -f 7_5_01.txt -id instances -o 1000 -p 20 -i 500 -s 10 -r 5 -v -od results
 ```
 
 ### Options du programme
@@ -150,11 +145,11 @@ Les résultats sont sauvegardés avec un nom préfixé par l'instance et les par
 ### Génération des graphiques
 
 ```bash
-# Après avoir exécuté le programme
+# Après avoir exécuté le programme dans un répertoire de résultats
+cd results
 make graphs
 
 # Ou manuellement
-cd results
 gnuplot "50_10_01_i500_p10_front_comparaison.gnuplot"
 ```
 
@@ -180,26 +175,24 @@ Le graphique généré montrera la comparaison des fronts Pareto des deux approc
 ### Tests et validation
 
 ```bash
-# Tests rapides
+# Tests rapides avec différents arguments
 make test
 
 # Exécution sur instance test
-./mo -o 10 -p 2 -i 10 --no-analyze -f instances/7_5_01.txt
-
-# Exécution sur instance test
-./mo -o 10 -p 2 -i 10 --no-analyze -f 7_5_01.txt -ip instances
+./mo -f 7_5_01.txt -id instances -o 10 -p 2 -i 10 --no-analyze
 ```
 
 ## 🎯 Exemples d'utilisation
 
 ### Comparaison simple
 ```bash
-make run INSTANCE=instances/7_5_01.txt ARGS="-o 1000 -p 20 -v"
+./mo -f 7_5_01.txt -id instances -o 1000 -p 20 -i 500 -v
 ```
 
 ### Analyse approfondie
 ```bash
-make run INSTANCE=instances/50_10_01.txt ARGS="-o 10000 -p 40 -i 1000 -r 5 -v --output-dir results_detailed"
+./mo -f 50_10_01.txt -id instances -o 10000 -p 40 -i 1000 -r 5 -v -od results_detailed
+cd results_detailed
 make graphs
 ```
 

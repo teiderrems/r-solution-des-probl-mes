@@ -974,8 +974,8 @@ void afficher_aide()
     printf("  -od, --output-dir DIR           Repertoire de sortie pour les resultats (defaut: .)\n");
     printf("\nExemples:\n");
     printf("  ./tp_multiobj instance.txt\n");
-    printf("  ./tp_multiobj -o 1000 -p 20 -i 500 instance.txt\n");
-    printf("  ./tp_multiobj --algo scalar --iterations 2000 instance.txt\n");
+    printf("  ./tp_multiobj -o 1000 -p 20 -i 500 -f instance.txt\n");
+    printf("  ./tp_multiobj --algo scalar --iterations 2000 -f instance.txt\n");
 }
 
 int parse_arguments(int argc, char *argv[], Config *config)
@@ -1248,7 +1248,7 @@ void generer_scripts_gnuplot(Config *config, int nb_runs)
 
     // Titre et labels
     fprintf(script, "# Titre et labels\n");
-    fprintf(script, "set title 'Comparaison des fronts Pareto\\nInstance: %s (Iterations: %d, Pareto size: %d)'\n",
+    fprintf(script, "set title \"Comparaison des fronts Pareto\\nInstance: %s (Iterations: %d, Pareto size: %d)\"\n",
             extraire_nom_base(config->instance_file), config->max_iterations, config->pareto_size);
     fprintf(script, "set xlabel 'Makespan (Cmax)'\n");
     fprintf(script, "set ylabel 'Tardiness (Tsum)'\n");
@@ -1400,7 +1400,7 @@ void generer_graphique_hypervolume(Statistics *stats, int nb_runs, Config *confi
 
     fprintf(script, "set terminal pngcairo enhanced size 1200,600\n");
     fprintf(script, "set output '%s/%s_hypervolume_evolution.png'\n", abs_path, prefix);
-    fprintf(script, "set title 'Évolution de l\\'hypervolume\\nInstance: %s (Iterations: %d, Pareto size: %d, %d runs)'\n",
+    fprintf(script, "set title \"Évolution de l'hypervolume\\nInstance: %s (Iterations: %d, Pareto size: %d, %d runs)\"\n",
             extraire_nom_base(config->instance_file), config->max_iterations, config->pareto_size, nb_runs);
     fprintf(script, "set xlabel 'Run'\n");
     fprintf(script, "set ylabel 'Hypervolume'\n");
