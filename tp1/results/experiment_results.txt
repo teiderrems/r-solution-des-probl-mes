@@ -1,0 +1,212 @@
+# Résultats de l'expérimentation
+# Instance	MaxEvals	Algo	Voisinage	CoûtMoyen	TempsMoyen(s)
+20_10_01.txt	1000	Marche aléatoire	Échange	1796.70	0.003
+20_10_01.txt	1000	Climber First	Échange	1678.30	0.002
+20_10_01.txt	1000	Climber Best	Échange	1725.10	0.003
+20_10_01.txt	1000	Mon algorithme	Échange	1661.90	0.002
+20_10_01.txt	1000	Mon algorithme v2	Échange	1651.70	0.002
+20_10_01.txt	1000	Marche aléatoire	Insertion	1819.60	0.003
+20_10_01.txt	1000	Climber First	Insertion	1645.00	0.003
+20_10_01.txt	1000	Climber Best	Insertion	1811.30	0.003
+20_10_01.txt	1000	Mon algorithme	Insertion	1633.90	0.003
+20_10_01.txt	1000	Mon algorithme v2	Insertion	1640.40	0.004
+20_10_01.txt	5000	Marche aléatoire	Échange	1774.70	0.017
+20_10_01.txt	5000	Climber First	Échange	1670.00	0.004
+20_10_01.txt	5000	Climber Best	Échange	1666.90	0.008
+20_10_01.txt	5000	Mon algorithme	Échange	1663.00	0.003
+20_10_01.txt	5000	Mon algorithme v2	Échange	1654.20	0.003
+20_10_01.txt	5000	Marche aléatoire	Insertion	1769.00	0.018
+20_10_01.txt	5000	Climber First	Insertion	1635.10	0.004
+20_10_01.txt	5000	Climber Best	Insertion	1629.30	0.013
+20_10_01.txt	5000	Mon algorithme	Insertion	1627.70	0.004
+20_10_01.txt	5000	Mon algorithme v2	Insertion	1622.20	0.004
+20_10_01.txt	10000	Marche aléatoire	Échange	1763.20	0.024
+20_10_01.txt	10000	Climber First	Échange	1665.30	0.002
+20_10_01.txt	10000	Climber Best	Échange	1666.20	0.005
+20_10_01.txt	10000	Mon algorithme	Échange	1675.90	0.002
+20_10_01.txt	10000	Mon algorithme v2	Échange	1656.80	0.003
+20_10_01.txt	10000	Marche aléatoire	Insertion	1766.80	0.025
+20_10_01.txt	10000	Climber First	Insertion	1627.40	0.003
+20_10_01.txt	10000	Climber Best	Insertion	1632.60	0.011
+20_10_01.txt	10000	Mon algorithme	Insertion	1626.60	0.003
+20_10_01.txt	10000	Mon algorithme v2	Insertion	1631.10	0.004
+20_20_01.txt	1000	Marche aléatoire	Échange	2539.90	0.004
+20_20_01.txt	1000	Climber First	Échange	2403.10	0.003
+20_20_01.txt	1000	Climber Best	Échange	2419.10	0.005
+20_20_01.txt	1000	Mon algorithme	Échange	2395.10	0.004
+20_20_01.txt	1000	Mon algorithme v2	Échange	2421.60	0.003
+20_20_01.txt	1000	Marche aléatoire	Insertion	2533.40	0.005
+20_20_01.txt	1000	Climber First	Insertion	2376.30	0.005
+20_20_01.txt	1000	Climber Best	Insertion	2526.20	0.005
+20_20_01.txt	1000	Mon algorithme	Insertion	2381.10	0.006
+20_20_01.txt	1000	Mon algorithme v2	Insertion	2383.10	0.006
+20_20_01.txt	5000	Marche aléatoire	Échange	2512.90	0.026
+20_20_01.txt	5000	Climber First	Échange	2399.00	0.003
+20_20_01.txt	5000	Climber Best	Échange	2393.70	0.009
+20_20_01.txt	5000	Mon algorithme	Échange	2409.40	0.004
+20_20_01.txt	5000	Mon algorithme v2	Échange	2399.70	0.005
+20_20_01.txt	5000	Marche aléatoire	Insertion	2503.50	0.035
+20_20_01.txt	5000	Climber First	Insertion	2374.30	0.006
+20_20_01.txt	5000	Climber Best	Insertion	2396.10	0.017
+20_20_01.txt	5000	Mon algorithme	Insertion	2366.30	0.007
+20_20_01.txt	5000	Mon algorithme v2	Insertion	2372.70	0.005
+20_20_01.txt	10000	Marche aléatoire	Échange	2495.20	0.035
+20_20_01.txt	10000	Climber First	Échange	2411.70	0.002
+20_20_01.txt	10000	Climber Best	Échange	2421.50	0.006
+20_20_01.txt	10000	Mon algorithme	Échange	2402.60	0.002
+20_20_01.txt	10000	Mon algorithme v2	Échange	2404.20	0.003
+20_20_01.txt	10000	Marche aléatoire	Insertion	2509.80	0.033
+20_20_01.txt	10000	Climber First	Insertion	2381.60	0.004
+20_20_01.txt	10000	Climber Best	Insertion	2381.20	0.016
+20_20_01.txt	10000	Mon algorithme	Insertion	2369.30	0.005
+20_20_01.txt	10000	Mon algorithme v2	Insertion	2390.10	0.005
+30_10_01.txt	1000	Marche aléatoire	Échange	2277.10	0.003
+30_10_01.txt	1000	Climber First	Échange	2082.00	0.003
+30_10_01.txt	1000	Climber Best	Échange	2277.20	0.003
+30_10_01.txt	1000	Mon algorithme	Échange	2094.10	0.004
+30_10_01.txt	1000	Mon algorithme v2	Échange	2089.90	0.003
+30_10_01.txt	1000	Marche aléatoire	Insertion	2302.10	0.003
+30_10_01.txt	1000	Climber First	Insertion	2096.20	0.005
+30_10_01.txt	1000	Climber Best	Insertion	2347.90	0.005
+30_10_01.txt	1000	Mon algorithme	Insertion	2107.40	0.006
+30_10_01.txt	1000	Mon algorithme v2	Insertion	2090.30	0.005
+30_10_01.txt	5000	Marche aléatoire	Échange	2247.60	0.022
+30_10_01.txt	5000	Climber First	Échange	2071.40	0.009
+30_10_01.txt	5000	Climber Best	Échange	2096.40	0.018
+30_10_01.txt	5000	Mon algorithme	Échange	2079.20	0.006
+30_10_01.txt	5000	Mon algorithme v2	Échange	2075.10	0.007
+30_10_01.txt	5000	Marche aléatoire	Insertion	2257.00	0.022
+30_10_01.txt	5000	Climber First	Insertion	2085.00	0.010
+30_10_01.txt	5000	Climber Best	Insertion	2171.30	0.014
+30_10_01.txt	5000	Mon algorithme	Insertion	2072.60	0.008
+30_10_01.txt	5000	Mon algorithme v2	Insertion	2088.70	0.009
+30_10_01.txt	10000	Marche aléatoire	Échange	2227.40	0.032
+30_10_01.txt	10000	Climber First	Échange	2084.80	0.005
+30_10_01.txt	10000	Climber Best	Échange	2090.10	0.020
+30_10_01.txt	10000	Mon algorithme	Échange	2089.30	0.007
+30_10_01.txt	10000	Mon algorithme v2	Échange	2087.40	0.008
+30_10_01.txt	10000	Marche aléatoire	Insertion	2237.10	0.034
+30_10_01.txt	10000	Climber First	Insertion	2075.90	0.010
+30_10_01.txt	10000	Climber Best	Insertion	2111.40	0.035
+30_10_01.txt	10000	Mon algorithme	Insertion	2071.50	0.011
+30_10_01.txt	10000	Mon algorithme v2	Insertion	2075.30	0.009
+30_20_01.txt	1000	Marche aléatoire	Échange	3172.00	0.006
+30_20_01.txt	1000	Climber First	Échange	2932.00	0.006
+30_20_01.txt	1000	Climber Best	Échange	3146.10	0.006
+30_20_01.txt	1000	Mon algorithme	Échange	2914.20	0.006
+30_20_01.txt	1000	Mon algorithme v2	Échange	2907.80	0.008
+30_20_01.txt	1000	Marche aléatoire	Insertion	3177.80	0.008
+30_20_01.txt	1000	Climber First	Insertion	2901.90	0.009
+30_20_01.txt	1000	Climber Best	Insertion	3261.20	0.008
+30_20_01.txt	1000	Mon algorithme	Insertion	2909.60	0.009
+30_20_01.txt	1000	Mon algorithme v2	Insertion	2903.50	0.009
+30_20_01.txt	5000	Marche aléatoire	Échange	3121.90	0.030
+30_20_01.txt	5000	Climber First	Échange	2905.20	0.013
+30_20_01.txt	5000	Climber Best	Échange	2911.30	0.032
+30_20_01.txt	5000	Mon algorithme	Échange	2887.60	0.012
+30_20_01.txt	5000	Mon algorithme v2	Échange	2884.00	0.012
+30_20_01.txt	5000	Marche aléatoire	Insertion	3139.30	0.026
+30_20_01.txt	5000	Climber First	Insertion	2858.70	0.013
+30_20_01.txt	5000	Climber Best	Insertion	3016.50	0.029
+30_20_01.txt	5000	Mon algorithme	Insertion	2854.80	0.017
+30_20_01.txt	5000	Mon algorithme v2	Insertion	2864.80	0.015
+30_20_01.txt	10000	Marche aléatoire	Échange	3109.50	0.050
+30_20_01.txt	10000	Climber First	Échange	2906.80	0.010
+30_20_01.txt	10000	Climber Best	Échange	2911.50	0.033
+30_20_01.txt	10000	Mon algorithme	Échange	2893.20	0.008
+30_20_01.txt	10000	Mon algorithme v2	Échange	2900.20	0.008
+30_20_01.txt	10000	Marche aléatoire	Insertion	3111.10	0.042
+30_20_01.txt	10000	Climber First	Insertion	2861.30	0.014
+30_20_01.txt	10000	Climber Best	Insertion	2937.30	0.042
+30_20_01.txt	10000	Mon algorithme	Insertion	2860.30	0.014
+30_20_01.txt	10000	Mon algorithme v2	Insertion	2877.00	0.012
+50_10_01.txt	1000	Marche aléatoire	Échange	3546.30	0.003
+50_10_01.txt	1000	Climber First	Échange	3239.20	0.005
+50_10_01.txt	1000	Climber Best	Échange	3656.80	0.004
+50_10_01.txt	1000	Mon algorithme	Échange	3245.90	0.005
+50_10_01.txt	1000	Mon algorithme v2	Échange	3236.40	0.005
+50_10_01.txt	1000	Marche aléatoire	Insertion	3546.20	0.005
+50_10_01.txt	1000	Climber First	Insertion	3235.80	0.012
+50_10_01.txt	1000	Climber Best	Insertion	3773.00	0.007
+50_10_01.txt	1000	Mon algorithme	Insertion	3213.80	0.010
+50_10_01.txt	1000	Mon algorithme v2	Insertion	3221.80	0.011
+50_10_01.txt	5000	Marche aléatoire	Échange	3479.20	0.020
+50_10_01.txt	5000	Climber First	Échange	3188.40	0.018
+50_10_01.txt	5000	Climber Best	Échange	3388.90	0.019
+50_10_01.txt	5000	Mon algorithme	Échange	3183.30	0.016
+50_10_01.txt	5000	Mon algorithme v2	Échange	3193.30	0.024
+50_10_01.txt	5000	Marche aléatoire	Insertion	3466.70	0.037
+50_10_01.txt	5000	Climber First	Insertion	3153.70	0.028
+50_10_01.txt	5000	Climber Best	Insertion	3593.20	0.021
+50_10_01.txt	5000	Mon algorithme	Insertion	3136.90	0.028
+50_10_01.txt	5000	Mon algorithme v2	Insertion	3140.60	0.031
+50_10_01.txt	10000	Marche aléatoire	Échange	3477.40	0.043
+50_10_01.txt	10000	Climber First	Échange	3181.40	0.019
+50_10_01.txt	10000	Climber Best	Échange	3272.10	0.049
+50_10_01.txt	10000	Mon algorithme	Échange	3166.30	0.028
+50_10_01.txt	10000	Mon algorithme v2	Échange	3194.30	0.027
+50_10_01.txt	10000	Marche aléatoire	Insertion	3475.20	0.045
+50_10_01.txt	10000	Climber First	Insertion	3155.00	0.034
+50_10_01.txt	10000	Climber Best	Insertion	3465.30	0.080
+50_10_01.txt	10000	Mon algorithme	Insertion	3136.50	0.041
+50_10_01.txt	10000	Mon algorithme v2	Insertion	3147.40	0.040
+50_20_01.txt	1000	Marche aléatoire	Échange	4581.90	0.008
+50_20_01.txt	1000	Climber First	Échange	4169.00	0.009
+50_20_01.txt	1000	Climber Best	Échange	4703.10	0.009
+50_20_01.txt	1000	Mon algorithme	Échange	4187.50	0.014
+50_20_01.txt	1000	Mon algorithme v2	Échange	4195.50	0.014
+50_20_01.txt	1000	Marche aléatoire	Insertion	4603.40	0.011
+50_20_01.txt	1000	Climber First	Insertion	4170.30	0.018
+50_20_01.txt	1000	Climber Best	Insertion	4815.10	0.010
+50_20_01.txt	1000	Mon algorithme	Insertion	4165.50	0.015
+50_20_01.txt	1000	Mon algorithme v2	Insertion	4175.70	0.014
+50_20_01.txt	5000	Marche aléatoire	Échange	4534.70	0.046
+50_20_01.txt	5000	Climber First	Échange	4070.60	0.047
+50_20_01.txt	5000	Climber Best	Échange	4425.20	0.047
+50_20_01.txt	5000	Mon algorithme	Échange	4069.80	0.052
+50_20_01.txt	5000	Mon algorithme v2	Échange	4070.90	0.050
+50_20_01.txt	5000	Marche aléatoire	Insertion	4538.80	0.049
+50_20_01.txt	5000	Climber First	Insertion	4050.70	0.049
+50_20_01.txt	5000	Climber Best	Insertion	4652.70	0.053
+50_20_01.txt	5000	Mon algorithme	Insertion	4062.40	0.075
+50_20_01.txt	5000	Mon algorithme v2	Insertion	4046.90	0.064
+50_20_01.txt	10000	Marche aléatoire	Échange	4481.80	0.108
+50_20_01.txt	10000	Climber First	Échange	4088.60	0.049
+50_20_01.txt	10000	Climber Best	Échange	4258.90	0.092
+50_20_01.txt	10000	Mon algorithme	Échange	4111.20	0.039
+50_20_01.txt	10000	Mon algorithme v2	Échange	4096.40	0.067
+50_20_01.txt	10000	Marche aléatoire	Insertion	4519.20	0.092
+50_20_01.txt	10000	Climber First	Insertion	4013.50	0.082
+50_20_01.txt	10000	Climber Best	Insertion	4441.80	0.080
+50_20_01.txt	10000	Mon algorithme	Insertion	4036.70	0.079
+50_20_01.txt	10000	Mon algorithme v2	Insertion	4036.90	0.073
+7_5_01.txt	1000	Marche aléatoire	Échange	666.60	0.000
+7_5_01.txt	1000	Climber First	Échange	674.50	0.000
+7_5_01.txt	1000	Climber Best	Échange	670.80	0.000
+7_5_01.txt	1000	Mon algorithme	Échange	675.60	0.000
+7_5_01.txt	1000	Mon algorithme v2	Échange	670.80	0.000
+7_5_01.txt	1000	Marche aléatoire	Insertion	668.50	0.000
+7_5_01.txt	1000	Climber First	Insertion	665.60	0.000
+7_5_01.txt	1000	Climber Best	Insertion	671.40	0.000
+7_5_01.txt	1000	Mon algorithme	Insertion	669.70	0.000
+7_5_01.txt	1000	Mon algorithme v2	Insertion	670.40	0.000
+7_5_01.txt	5000	Marche aléatoire	Échange	665.20	0.002
+7_5_01.txt	5000	Climber First	Échange	673.80	0.000
+7_5_01.txt	5000	Climber Best	Échange	671.10	0.000
+7_5_01.txt	5000	Mon algorithme	Échange	675.30	0.000
+7_5_01.txt	5000	Mon algorithme v2	Échange	675.70	0.000
+7_5_01.txt	5000	Marche aléatoire	Insertion	665.20	0.002
+7_5_01.txt	5000	Climber First	Insertion	671.80	0.000
+7_5_01.txt	5000	Climber Best	Insertion	672.00	0.000
+7_5_01.txt	5000	Mon algorithme	Insertion	666.00	0.000
+7_5_01.txt	5000	Mon algorithme v2	Insertion	670.10	0.000
+7_5_01.txt	10000	Marche aléatoire	Échange	665.20	0.005
+7_5_01.txt	10000	Climber First	Échange	675.30	0.000
+7_5_01.txt	10000	Climber Best	Échange	671.50	0.000
+7_5_01.txt	10000	Mon algorithme	Échange	674.10	0.000
+7_5_01.txt	10000	Mon algorithme v2	Échange	671.70	0.000
+7_5_01.txt	10000	Marche aléatoire	Insertion	665.20	0.005
+7_5_01.txt	10000	Climber First	Insertion	673.00	0.000
+7_5_01.txt	10000	Climber Best	Insertion	667.80	0.000
+7_5_01.txt	10000	Mon algorithme	Insertion	670.60	0.000
+7_5_01.txt	10000	Mon algorithme v2	Insertion	673.30	0.000

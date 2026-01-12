@@ -137,6 +137,39 @@ make experiment
   - `config_[max_iter]_[pareto_size]_plot.gnuplot` : Graphique par configuration
   - `[instance]_max_iter_[max_iter]_pareto_size_[pareto_size]_plot.gnuplot` : Graphique par instance et config
 
+## 📈 Visualisation des Fronts Pareto
+
+Le programme génère automatiquement des graphiques comparant les fronts Pareto obtenus par les deux approches (scalaire et Pareto directe).
+
+### Graphiques de Comparaison de Fronts
+Pour chaque instance et configuration testée, un script gnuplot est généré :
+- `[instance]_i[max_iter]_p[pareto_size]_front_comparaison.gnuplot`
+
+Ces scripts génèrent des graphiques PNG montrant :
+- **Points bleus** : Solutions du front Pareto de l'approche scalaire
+- **Points rouges** : Solutions du front Pareto de l'approche Pareto directe
+- **Axes** : Makespan (X) vs Tardiness totale (Y)
+
+### Génération des Graphiques
+```bash
+# Depuis le répertoire de résultats
+cd results/
+gnuplot 7_5_01_i1000_p20_front_comparaison.gnuplot
+```
+
+### Fichiers de Données
+Les fronts sont sauvegardés dans des fichiers `.dat` :
+- `[instance]_i[max_iter]_p[pareto_size]_front_scalaire_run_1.dat`
+- `[instance]_i[max_iter]_p[pareto_size]_front_pareto_run_1.dat`
+
+Format des fichiers de données :
+```
+# Makespan Tardiness
+1234.5 567.8
+2345.6 678.9
+...
+```
+
 ## 📊 Format des Instances
 
 Le format des fichiers d'instance est le suivant :

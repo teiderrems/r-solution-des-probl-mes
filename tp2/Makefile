@@ -28,6 +28,10 @@ graphs: $(TARGET)
 	@echo "Génération des graphiques..."
 	@cd results && for script in *.gnuplot; do echo "Exécution de $$script"; gnuplot $$script; done
 
+front_graphs: $(TARGET)
+	@echo "Génération des graphiques de fronts Pareto..."
+	@cd results && for script in *_front_comparaison.gnuplot; do echo "Exécution de $$script"; gnuplot $$script; done
+
 experiment: $(TARGET)
 	@echo "Lancement de l'expérimentation sur toutes les instances..."
 	./$(TARGET) --experiment -od results -r 5 -od results -r 5

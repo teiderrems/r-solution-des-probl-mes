@@ -1214,7 +1214,6 @@ void generer_scripts_gnuplot(Config *config, int nb_runs)
                                config->pareto_size, prefix, sizeof(prefix));
 
     char chemin_script[1024];
-    char chemin_data[1024];
 
     // Chemin complet pour le script principal
     snprintf(chemin_script, sizeof(chemin_script), "%s/%s_front_comparaison.gnuplot",
@@ -1248,6 +1247,7 @@ void generer_scripts_gnuplot(Config *config, int nb_runs)
     fprintf(script, "set terminal pngcairo enhanced size 1200,800\n");
     fprintf(script, "set encoding utf8\n");
     fprintf(script, "set datafile separator whitespace\n");
+    fprintf(script, "set datafile commentschars \"#\"\n");
     fprintf(script, "set key top right\n");
     fprintf(script, "set grid\n");
     fprintf(script, "set style line 1 lc rgb '#0060ad' lt 1 lw 2 pt 7 ps 1.5   # Scalaire\n");
@@ -1266,7 +1266,7 @@ void generer_scripts_gnuplot(Config *config, int nb_runs)
 
     // CORRECTION ICI : Supprimer le répertoire du chemin de sortie
     fprintf(script, "# Fichier de sortie\n");
-    fprintf(script, "set output '%s/%s_front_comparaison.png'\n", abs_path, prefix);
+    fprintf(script, "set output '%s_front_comparaison.png'\n", prefix);
     fprintf(script, "\n");
 
     // Commande de plot
@@ -1279,19 +1279,19 @@ void generer_scripts_gnuplot(Config *config, int nb_runs)
     // Front offline (référence)
     if (!first_plot)
         fprintf(script, ", ");
-    fprintf(script, "'%s/%s_front_offline.dat' using 1:2 with points ls 3 title 'Filtrage Offline (référence)'", abs_path, prefix);
+    fprintf(script, "'%s_front_offline.dat' using 1:2 with points ls 3 title 'Filtrage Offline (référence)'", prefix);
     first_plot = 0;
 
     // Fronts par run (scalaire et Pareto)
     for (int run = 1; run <= nb_runs; run++)
     {
         // Front scalaire
-        fprintf(script, ", '%s/%s_front_scalaire_run_%d.dat' using 1:2 with points ls 1 title 'Scalaire Run %d'",
-                abs_path, prefix, run, run);
+        fprintf(script, ", '%s_front_scalaire_run_%d.dat' using 1:2 with points ls 1 title 'Scalaire Run %d'",
+                prefix, run, run);
 
         // Front Pareto
-        fprintf(script, ", '%s/%s_front_pareto_run_%d.dat' using 1:2 with points ls 2 title 'Pareto Run %d'",
-                abs_path, prefix, run, run);
+        fprintf(script, ", '%s_front_pareto_run_%d.dat' using 1:2 with points ls 2 title 'Pareto Run %d'",
+                prefix, run, run);
     }
 
     fprintf(script, "\n\n");
@@ -1738,13 +1738,18 @@ void executer_experimentation(Instance *instance, Config *config)
     if (config->nb_runs > 1 && !config->no_analyze && strcmp(config->algo_type, "all") == 0)
     {
         afficher_statistiques_globales(all_stats, config->nb_runs, config);
-        free(all_stats);
     }
 
     // Analyse graphique des résultats
     if (!config->no_analyze)
     {
         analyser_fronts_visuellement(config, config->nb_runs, all_stats);
+    }
+
+    // Libération de la mémoire
+    if (config->nb_runs > 1 && !config->no_analyze && strcmp(config->algo_type, "all") == 0)
+    {
+        free(all_stats);
     }
 }
 
@@ -1781,6 +1786,12 @@ void experiment_all_instances(Config *config) {
     fprintf(f, "# Résultats de l'expérimentation TP2\n");
     fprintf(f, "# Instance\tMaxIter\tParetoSize\tAlgo\tHypervolume\tSolutions\tTemps(s)\n");
 
+    // Liste pour stocker les instances traitées
+    char **instances_traitees = NULL;
+    int nb_instances_traitees = 0;
+    int capacite_instances = 10;
+    instances_traitees = (char **)malloc(capacite_instances * sizeof(char *));
+
     // Paramètres à tester
     int max_iter_list[] = {100, 500, 1000};
     int pareto_size_list[] = {5, 10, 20};
@@ -1802,6 +1813,15 @@ void experiment_all_instances(Config *config) {
             }
 
             printf("Traitement de l'instance %s\n", entry->d_name);
+
+            // Ajouter à la liste des instances traitées
+            if (nb_instances_traitees >= capacite_instances) {
+                capacite_instances *= 2;
+                instances_traitees = (char **)realloc(instances_traitees, capacite_instances * sizeof(char *));
+            }
+            instances_traitees[nb_instances_traitees] = (char *)malloc(strlen(entry->d_name) + 1);
+            strcpy(instances_traitees[nb_instances_traitees], entry->d_name);
+            nb_instances_traitees++;
 
             srand(config->seed == 0 ? time(NULL) : config->seed);
 
@@ -1839,6 +1859,15 @@ void experiment_all_instances(Config *config) {
                                 ref_makespan *= 1.1;
                                 ref_tardiness *= 1.1;
                                 stats.hypervolume_scalar = calculer_hypervolume(archive, ref_makespan, ref_tardiness);
+
+                                // Sauvegarder le front pour le premier run
+                                if (run == 0) {
+                                    char prefix[256];
+                                    construire_prefixe_fichier(entry->d_name, max_iter, pareto_size, prefix, sizeof(prefix));
+                                    char filename[256];
+                                    snprintf(filename, sizeof(filename), "%s_front_scalaire_run_1.dat", prefix);
+                                    sauvegarder_front(filename, archive, config);
+                                }
                             } else if (strcmp(algo, "pareto") == 0) {
                                 archive = approche_pareto(inst, pareto_size, max_iter, config);
                                 stats.solutions_pareto = archive->size;
@@ -1855,6 +1884,15 @@ void experiment_all_instances(Config *config) {
                                 ref_makespan *= 1.1;
                                 ref_tardiness *= 1.1;
                                 stats.hypervolume_pareto = calculer_hypervolume(archive, ref_makespan, ref_tardiness);
+
+                                // Sauvegarder le front pour le premier run
+                                if (run == 0) {
+                                    char prefix[256];
+                                    construire_prefixe_fichier(entry->d_name, max_iter, pareto_size, prefix, sizeof(prefix));
+                                    char filename[256];
+                                    snprintf(filename, sizeof(filename), "%s_front_pareto_run_1.dat", prefix);
+                                    sauvegarder_front(filename, archive, config);
+                                }
                             }
 
                             if (archive) {
@@ -1984,6 +2022,51 @@ void experiment_all_instances(Config *config) {
     fclose(f);
     closedir(dir);
     printf("Expérimentation terminée. Résultats dans %s\n", result_file);
+
+    // Générer les scripts de visualisation des fronts pour chaque instance et configuration
+    printf("\n=== GÉNÉRATION DES SCRIPTS DE VISUALISATION DES FRONTS ===\n");
+    for (int i = 0; i < nb_instances_traitees; i++) {
+        char instance_path[512];
+        sprintf(instance_path, "%s/%s", instance_dir, instances_traitees[i]);
+        
+        // Sauvegarder la config originale
+        char original_instance_file[256];
+        strcpy(original_instance_file, config->instance_file);
+        int original_max_iter = config->max_iterations;
+        int original_pareto_size = config->pareto_size;
+        
+        // Charger l'instance pour vérifier qu'elle existe
+        Instance* inst = lire_instance(instance_path);
+        if (!inst) continue;
+        liberer_instance(inst);
+        
+        // Pour chaque configuration
+        for (int m = 0; m < num_max_iter; m++) {
+            int max_iter = max_iter_list[m];
+            for (int p = 0; p < num_pareto_size; p++) {
+                int pareto_size = pareto_size_list[p];
+                
+                // Mettre à jour la config temporairement
+                strcpy(config->instance_file, instance_path);
+                config->max_iterations = max_iter;
+                config->pareto_size = pareto_size;
+                
+                // Générer les scripts pour cette configuration
+                analyser_fronts_visuellement(config, config->nb_runs, NULL);
+            }
+        }
+        
+        // Restaurer la config originale
+        strcpy(config->instance_file, original_instance_file);
+        config->max_iterations = original_max_iter;
+        config->pareto_size = original_pareto_size;
+    }
+
+    // Libérer la mémoire des instances
+    for (int i = 0; i < nb_instances_traitees; i++) {
+        free(instances_traitees[i]);
+    }
+    free(instances_traitees);
 
     // Générer le script gnuplot
     char gnuplot_file[512];
