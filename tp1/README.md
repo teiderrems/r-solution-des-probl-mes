@@ -70,6 +70,12 @@ Si un répertoire de sortie est spécifié (`-o`), le programme sauvegarde les r
 - Le graphique est sauvegardé dans `results/results_[instance]_[k].png`
 - Nécessite l'installation de Gnuplot : `sudo apt install gnuplot` (Ubuntu/Debian)
 
+- Pour générer tous les PNG en une commande : depuis le répertoire `tp1/`, exécuter `./generate_plots.sh` (génère tous les PNG listés par les scripts `.gnuplot` dans `tp1/results/`).
+
+> Voir aussi : [`tp1/gnuplot_examples.md`](tp1/gnuplot_examples.md) pour des exemples d'utilisation et des scripts prêts à l'emploi.
+
+> Voir aussi : [../tp2/gnuplot_examples.md](../tp2/gnuplot_examples.md) — exemple Gnuplot et script prêt à l'emploi pour tracer des fronts Pareto.
+
 **Nouvelles fonctionnalités (v1.1)**:
 - **Makefile minimaliste** : Cibles `make`, `make clean`, `make test`, `make graphs`
 - **Mode verbeux** (`-v`) : Affiche l'instance chargée et les solutions intermédiaires pour chaque exécution

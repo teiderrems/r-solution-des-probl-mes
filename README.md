@@ -149,6 +149,8 @@ L'analyse comparative montre que :
 
 ## TP2 : Flow Shop Multi-Objectif
 
+> Voir aussi : [tp2/gnuplot_examples.md](tp2/gnuplot_examples.md) — exemple Gnuplot et script prêt à l'emploi.
+
 ### Approche Multi-Objectif
 - **Objectifs concurrents** :
   - C_max : Makespan (minimiser)
