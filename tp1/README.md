@@ -108,10 +108,55 @@ Si un répertoire de sortie est spécifié (`-o`), le programme sauvegarde les r
 - Ajouter des tests unitaires pour `compute_makespan`, `insere` et `echange`.
 - Mesurer et profiler les performances (profiling, optimisation mémoire).
 - Implémenter une annulation efficace (undo) pour `insere` afin d'éviter la copie intégrale des solutions.
-- Ajouter un mode verbeux / logging et options en ligne de commande (par ex. choix d'algorithme, seed fixe). ✅ **Implémenté : options `-v`, `-k`, `-m`, `-o`, `-s`, `-h`, `-f`, `-i` avec parsing structuré.**
+- Ajouter un mode verbeux / logging et options en ligne de commande (par ex. choix d'algorithme, seed fixe). **Implémenté : options `-v`, `-k`, `-m`, `-o`, `-s`, `-h`, `-f`, `-i` avec parsing structuré.**
 - Supporter la lecture d'instances au format différent ou la génération aléatoire d'instances pour tests.
 
 **Conseils d'utilisation**:
 - Pour expérimenter, fixer `srand` avec une valeur connue (remplacer `srand(time(NULL))` par `srand(12345)`).
 - Commencer avec un petit `max_evals` (ex. `1000`) pour tester rapidement, puis augmenter.
+
+---
+
+## Résultats expérimentaux (TP1)
+
+### Données et graphiques
+- Les résultats agrégés sont disponibles dans `results/experiment_results.txt`.
+- Le graphique synthétique est disponible : `results/experiment_results.png`.
+- Graphiques par instance (exemples) :
+  - `results/7_5_01.txt_results.png`
+  - `results/20_10_01.txt_results.png`
+  - `results/50_20_01.txt_results.png`
+
+> Consulter le répertoire `tp1/results/` pour la collection complète de figures et scripts Gnuplot.
+
+### Observations (analyse succincte)
+1. **Performances globales** : Les algorithmes conçus (`Mon algorithme` et `Mon algorithme v2`) présentent une performance moyenne meilleure ou équivalente aux hill-climbers standards sur la plupart des instances, en particulier pour le voisinage *insertion*.
+
+2. **Effet du voisinage** : Le voisinage *insertion* tend à produire des coûts moyens plus bas que le voisinage *échange* pour la plupart des configurations testées — ceci est visible sur les graphiques par instance.
+
+3. **Influence du budget (`max_evals`)** : L'amélioration moyenne des coûts est sensible au budget d'évaluations : augmenter `max_evals` de 1 000 à 10 000 entraîne généralement une baisse du coût moyen (meilleure solution) pour les algorithmes locaux testés.
+
+4. **Temps d'exécution** : Les temps moyens restent faibles et comparables entre algorithmes sur les instances de petite et moyenne taille; les différences deviennent plus marquées pour les grandes instances (p. ex. `50_20_01`).
+
+### Interprétation et recommandations (style rapport)
+- **Conclusion principale** : Pour les instances et paramètres testés, privilégier le voisinage *insertion* et utiliser la version améliorée de l'algorithme (`Mon algorithme`) si l'on vise de meilleurs coûts moyens sous un budget d'évaluations modéré.
+
+- **Recommandation pratique** : Pour des résultats reproductibles et fiables, augmenter le nombre d'exécutions (`-k`) et calculer des intervalles de confiance (moyenne ± écart-type). De plus, comparer systématiquement *insertion* vs *échange* sur instances cibles avant déploiement.
+
+- **Pistes d'amélioration** : Étendre les expérimentations (plus de runs, variations de paramètres), ajouter des tests statistiques (ANOVA, tests pairés) et implémenter davantage d'opérateurs (p. ex. insertion ciblée, heuristiques hybrides).
+
+### Figures (exemples)
+
+- Figure 1 — Synthèse des coûts moyens par algorithme :
+
+  ![Synthèse résultats TP1](results/experiment_results.png)
+  *Légende : coût moyen (axe Y) pour chaque algorithme sous différentes configurations (axe X).* 
+
+- Figure 2 — Résultats pour `20_10_01` (exemple) :
+
+  ![Résultats 20_10_01](results/20_10_01.txt_results.png)
+  *Légende : comparaison des algorithmes pour `20_10_01` selon le voisinage et le budget d'évaluations.*
+
+---
+
 

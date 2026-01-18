@@ -63,7 +63,7 @@ Le problème Flow Shop consiste à ordonner des tâches sur des machines pour mi
 - Mémorisation des meilleures solutions trouvées
 - Redémarrage depuis des solutions mémorisées
 
-#### Stratégies d'implémentation (TP1) 🔧
+#### Stratégies d'implémentation (TP1)
 - **Représentation** : chaque solution est une permutation (`int perm[n]`). L'évaluation du makespan se fait par simulation séquentielle sur les `m` machines (complexité O(n·m)).
 - **Évaluation efficace** : fonctions dédiées `evaluate_makespan()` et `evaluate_sum_completion()` ; possibilité d'optimiser localement l'évaluation pour les voisinages d'insertion afin d'éviter des copies complètes.
 - **Voisinages** : implémentés en-place pour limiter les allocations : `swap(i,j)` (échange adjacent ou arbitraire) et `insert(i,j)` (décalage d'un élément). Chaque opération est suivie d'un rollback (`swap` inverse) pour tester sans copie coûteuse.
@@ -74,9 +74,9 @@ Le problème Flow Shop consiste à ordonner des tâches sur des machines pour mi
 - **Réutilisation de Solutions** : archive simple (tableau trié ou heap) des `K` meilleures solutions; lors d'un redémarrage, on sélectionne une solution de l'archive et on applique une petite perturbation (quelques swaps/insertions) pour échapper aux optima locaux. Détection de doublons via hachage simple (empreinte permutation).
 - **Paramétrage et robustesse** : parsing CLI pour `-k`, `-m`, `-seed`, `-v`; gestion stricte de la mémoire en C; sorties formatées pour générer automatiquement les scripts Gnuplot.
 
-> Note 💡 : Les fonctions de voisinage sont conçues pour modifier la permutation in-place et revenir à l'état initial rapidement, ce qui réduit les copies et accélère les boucles d'exploration.
+> Note : Les fonctions de voisinage sont conçues pour modifier la permutation in-place et revenir à l'état initial rapidement, ce qui réduit les copies et accélère les boucles d'exploration.
 
-#### Détails des fonctions (TP1) 🔍
+#### Détails des fonctions (TP1)
 Ci-dessous la liste des fonctions principales implémentées dans le répertoire `tp1` avec une brève description, signature, complexité approximative et remarques d'implémentation.
 
 - `void afficher_aide()` — Affiche l'aide et les options en ligne de commande.
@@ -105,7 +105,7 @@ Ci-dessous la liste des fonctions principales implémentées dans le répertoire
 > - Les fonctions qui retournent des pointeurs alloués (`Instance*`, `int*`, `Pair*`) exigent que l'appelant libère la mémoire correspondante.
 > - Les évaluations `compute_makespan` sont le goulot d'étranglement principal — optimisations locales (évaluations incrémentales) peuvent réduire considérablement le coût.
 
-##### Exemples d'utilisation (TP1) 🧾
+##### Exemples d'utilisation (TP1)
 Quelques exemples d'appels courants montrant la signature et l'usage minimal (libération mémoire requise) :
 
 ```c
@@ -134,7 +134,7 @@ free(best2);
 free_memory(inst3);
 ```
 
-> Astuce 💡 : Toujours libérer les solutions retournées par les algorithmes (`free(sol)`, `free(best)`) et les instances (`free_memory(inst)`).
+> Astuce : Toujours libérer les solutions retournées par les algorithmes (`free(sol)`, `free(best)`) et les instances (`free_memory(inst)`).
 
 
 ### Voisinages
@@ -164,7 +164,7 @@ L'analyse comparative montre que :
 - **Croisement et Mutation** : Opérateurs génétiques adaptés
 - **Évaluation** : Dominance de Pareto
 
-#### Stratégies d'implémentation (TP2) 🔧
+#### Stratégies d'implémentation (TP2)
 - **Représentation et évaluation** : solutions encodées en permutations (`int perm[n]`); chaque individu stocke les deux objectifs (C_max, ∑C_i). L'évaluation restreinte aux deux fonctions d'ordonnancement garantit des coûts prévisibles O(n·m).
 - **Initialisation** : population initiale générée aléatoirement (Fisher‑Yates) et enrichie par quelques heuristiques issues de TP1 (si activé) pour accélérer la convergence.
 - **Sélection** : tournoi binaire basé sur la dominance de Pareto et, en cas d'égalité, sur une métrique de diversité (crowding distance simple) pour préserver la diversité.
@@ -179,7 +179,7 @@ L'analyse comparative montre que :
 
 > Note 💡 : Le calcul de l'hypervolume est central pour l'évaluation; le code est optimisé pour des fronts 2D et permet le recalcul incrémental lorsque possible.
 
-##### Exemples d'utilisation (TP2) 🧾
+##### Exemples d'utilisation (TP2)
 Exemples courts illustrant la lecture d'instance, l'évaluation d'une permutation et l'utilisation des approches scalar/pareto :
 
 ```c
