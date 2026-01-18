@@ -2,13 +2,13 @@
 
 Un solveur pour le problème Flow Shop Permutation (FSP) multi-objectif implémentant deux approches d'optimisation : l'approche scalaire par pondération et l'approche Pareto directe.
 
-## 📋 Objectifs du Projet
+## Objectifs du Projet
 
 Ce projet résout le problème FSP avec deux objectifs à minimiser :
 - **Makespan (Cmax)** : Temps total pour compléter tous les jobs
 - **Tardiness totale (Tsum)** : Somme des retards des jobs par rapport à leurs dates d'échéance
 
-## ✨ Fonctionnalités
+## Fonctionnalités
 
 - **Lecture d'instances** : Format standard avec jobs, machines et temps de traitement
 - **Évaluation de solutions** : Calcul du makespan et de la tardiness totale
@@ -18,7 +18,7 @@ Ce projet résout le problème FSP avec deux objectifs à minimiser :
 - **Analyse comparative** : Calcul d'hypervolume et génération de statistiques
 - **Visualisation** : Génération automatique de graphiques avec gnuplot
 
-## 🏗️ Structure du Projet
+## Structure du Projet
 
 ```
 .
@@ -32,7 +32,7 @@ Ce projet résout le problème FSP avec deux objectifs à minimiser :
 └── results/            # Répertoire de sortie (généré automatiquement)
 ```
 
-## 📦 Installation et Compilation
+## Installation et Compilation
 
 ### Prérequis
 - GCC (GNU Compiler Collection)
@@ -54,7 +54,7 @@ make
 make clean
 ```
 
-## 🚀 Utilisation
+## Utilisation
 
 ### Commandes de base
 
@@ -102,7 +102,7 @@ make clean
 | `-ip, --input-dir DIR` | Répertoire des instances | 
 | `-f, --instance-file FILE` | Nom de l'instance.
 
-## 🧪 Mode Expérimentation
+## Mode Expérimentation
 
 Le mode expérimentation permet d'exécuter automatiquement les algorithmes sur toutes les instances disponibles avec diverses configurations de paramètres (`max_iterations` et `pareto_size`).
 
@@ -137,7 +137,7 @@ make experiment
   - `config_[max_iter]_[pareto_size]_plot.gnuplot` : Graphique par configuration
   - `[instance]_max_iter_[max_iter]_pareto_size_[pareto_size]_plot.gnuplot` : Graphique par instance et config
 
-## 📈 Visualisation des Fronts Pareto
+## Visualisation des Fronts Pareto
 
 Le programme génère automatiquement des graphiques comparant les fronts Pareto obtenus par les deux approches (scalaire et Pareto directe).
 
@@ -170,7 +170,39 @@ Format des fichiers de données :
 ...
 ```
 
-## 📊 Format des Instances
+### Expérimentation : Visualisation des fronts Pareto
+
+- Les scripts de comparaison (`[instance]_i[max_iter]_p[pareto_size]_front_comparaison.gnuplot`) génèrent un PNG par instance et configuration (`*_front_comparaison.png`) montrant les fronts obtenus par l'approche scalaire (bleu) et l'approche Pareto (rouge).
+
+- Fichiers utiles pour l'analyse détaillée :
+  - Les fichiers `.dat` (un fichier par run) permettent d'agréger plusieurs runs et d'extraire statistiques (moyennes de points projetés, densité, etc.).
+  - Le fichier `test_results_front/` contient de nombreux exemples prêts à l'emploi (`20_10_01_i1000_p10_front_comparaison.png`, `30_20_01_i500_p20_front_comparaison.png`, ...).
+
+- Commandes pratiques :
+  - Générer un graphique unique :
+    ```bash
+    cd test_results_front
+    gnuplot 20_10_01_i1000_p10_front_comparaison.gnuplot
+    ```
+  - Superposer plusieurs runs (ex. pour l'agrégation) : concaténer ou écrire un petit script Python qui lit tous les fichiers `*_front_pareto_run_*.dat` et trace les nuages de points avec transparence pour évaluer la variabilité.
+
+- Points d'interprétation (style rapport) :
+  1. **Recouvrement des fronts** : observer si les points de l'approche scalaire dominent ceux de l'approche Pareto (ou inversement) selon la région des objectifs. Un recouvrement partiel indique complémentarité.
+  2. **Diversité vs Convergence** : la distribution des points (largeur du front) donne une idée de la diversité; la proximité au front théorique (si connu) renseigne sur la convergence.
+  3. **Annotation par métriques** : il est utile d'annoter les figures avec les hypervolumes moyens (calculés dans `experiment_results_tp2.txt`) pour fournir une mesure quantitative en plus de la visualisation.
+
+- Exemple de figure (extrait) :
+
+  ![Comparaison front Pareto 20_10_01](test_results_front/20_10_01_i1000_p10_front_comparaison.png)
+  *Légende : bleu = approche scalaire, rouge = approche Pareto directe. Les données proviennent des fichiers `.dat` associés.*
+
+> Recommandation : Pour publications ou rapports, regrouper plusieurs runs (≥ 5) et afficher bandes d'incertitude (p.ex. enveloppe min/max ou intervalle interquartile) afin de rendre la comparaison robuste et statistiquement significative.
+
+Pour l'agrégation et la visualisation multi-run, utilisez les scripts Gnuplot fournis dans `test_results_front/` et les fichiers `.dat` générés par l'exécution (p.ex. `[instance]_i[max_iter]_p[pareto_size]_front_comparaison.gnuplot` et leurs PNG associés).
+
+> Recommandation : pour des comparaisons robustes, regrouper plusieurs runs (≥ 5) et afficher des bandes d'incertitude (ex. min/max ou intervalle interquartile) à partir des `.dat` existants.
+
+## Format des Instances
 
 Le format des fichiers d'instance est le suivant :
 ```
@@ -203,7 +235,7 @@ Exemple pour un problème avec 7 jobs et 5 machines :
 ...
 ```
 
-## 📈 Résultats et Visualisation
+## Résultats et Visualisation
 
 ### Fichiers générés
 Les résultats sont sauvegardés avec un nom préfixé par l'instance et les paramètres :
@@ -267,7 +299,7 @@ cd results_detailed
 make graphs
 ```
 
-## 📊 Interprétation des résultats
+## Interprétation des résultats
 
 ### Métriques principales
 1. **Hypervolume** : Mesure la qualité du front Pareto (plus élevé = meilleur)
@@ -285,6 +317,54 @@ Moyenne temps scalaire:       6.244 s
 Moyenne temps Pareto:         0.043 s
 Conclusion: Approche scalaire en moyenne meilleure de +135.0%
 ```
+
+---
+
+## Résultats expérimentaux (TP2)
+
+### Données et graphiques
+- Les résultats agrégés sont sauvegardés dans `test_results_front/experiment_results_tp2.txt`.
+- Le graphique synthétique global est disponible : `test_results_front/experiment_results_tp2.png`.
+- Graphiques complémentaires (hypervolume par instance / configuration) :
+  - `test_results_front/hypervolume_vs_instance_max_iter_100_pareto_size_5.png` (ex.)
+  - `test_results_front/hypervolume_vs_instance_max_iter_500_pareto_size_10.png` (ex.)
+  - `test_results_front/hypervolume_vs_instance_max_iter_1000_pareto_size_20.png` (ex.)
+
+> Voir le répertoire `test_results_front/` pour la collection complète de figures et scripts Gnuplot.
+
+### Observations (analyse succincte)
+1. **Tendance générale** : L'approche scalaire produit, en moyenne, des hypervolumes plus élevés que l'approche Pareto directe sur de nombreuses instances et configurations testées. Ceci indique une meilleure couverture de l'espace objectif pour les paramètres explorés.
+
+2. **Dépendance à la configuration** : Les performances relatives des deux approches varient selon la **taille d'archive Pareto** et le **nombre d'itérations**. Par exemple, pour `30_20_01` et `max_iter=1000, pareto_size=20`, l'approche Pareto dépasse notablement l'approche scalaire (hypervolume Pareto supérieur), ce qui montre que l'approche Pareto profite d'une archive plus large et d'itérations suffisantes.
+
+3. **Comportement par instance** : Sur les instances de grande taille (`50_10_01`, `50_20_01`), les hypervolumes absolus sont plus élevés (échelle) et l'approche scalaire reste souvent dominante, probablement en raison d'une exploration plus agressive permise par la scalarisation et le budget d'itérations choisis.
+
+4. **Nombre de solutions** : Le nombre moyen de solutions non-dominées trouvé par l'approche Pareto est généralement supérieur ou égal à celui de l'approche scalaire (dépend fortement des paramètres), ce qui est attendu car l'approche Pareto vise explicitement la diversité.
+
+5. **Temps d'exécution** : Les durées moyennes signalées montrent que l'approche scalaire peut être plus coûteuse en temps pour certaines configurations (dépend de l'implémentation et du nombre d'itérations), mais l'écart dépend fortement de la taille de l'instance et des paramètres d'exécution.
+
+### Interprétation et recommandations
+- **Conclusion principale** : Pour des comparaisons directes sous budget d'itérations modéré, l'approche scalaire tend à fournir un hypervolume moyen supérieur — utile si l'objectif est d'optimiser l'hypervolume global rapidement.
+- **Recommandation pratique** : Si la diversité du front est prioritaire (p.ex. usage multi-critère réel), privilégier l'approche Pareto avec une **taille d'archive plus importante** et un **nombre d'itérations élevé**, car elle montre de meilleures performances sur certaines instances et configurations.
+- **Pistes d'amélioration** : Étendre les tests (plus de runs) pour obtenir intervalles de confiance, tester d'autres opérateurs génétiques/paramètres, et comparer la contribution de la taille d'archive vs. le budget d'itérations sur la dispersion du front.
+
+### Figures (exemples)
+
+- Figure 1 — Synthèse des hypervolumes par configuration :
+
+  ![Synthèse hypervolumes](test_results_front/experiment_results_tp2.png)
+  *Légende : hypervolume moyen (axe Y) pour chaque configuration d'instance (axe X), comparant approches scalaire (bleu) et Pareto (rouge).* 
+
+- Figure 2 — Hypervolume par instance (exemples) :
+
+  ![Hypervolume par instance (ex.)](test_results_front/hypervolume_vs_instance_max_iter_1000_pareto_size_10.png)
+  *Légende : évolution comparée des hypervolumes pour chaque instance sous `max_iter=1000, pareto_size=10`.*
+
+
+> Remarque : Ces figures servent d'illustration. Pour une analyse robuste, produire des intervalles de confiance (p.ex. ±std) sur plusieurs runs et tester une gamme plus large de paramètres.
+
+---
+
 
 ## 🤝 Contribution
 
