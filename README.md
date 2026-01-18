@@ -332,9 +332,3 @@ TP/
 - Parsing robuste des arguments en ligne de commande
 - Génération automatique de scripts Gnuplot
 - Gestion mémoire sécurisée
-
----
-
-**Auteur** : Teida Noutsa  
-**Date** : Janvier 2026  
-**Contexte** : Mineure IA - Résolution de Problèmes

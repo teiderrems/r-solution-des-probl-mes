@@ -258,7 +258,7 @@ gnuplot "50_10_01_i500_p10_front_comparaison.gnuplot"
 
 Le graphique généré montrera la comparaison des fronts Pareto des deux approches.
 
-## 📚 Développement
+##  Développement
 
 ### Structure du code
 
@@ -285,7 +285,7 @@ make test
 ./mo -f 7_5_01.txt -id instances -o 10 -p 2 -i 10 --no-analyze
 ```
 
-## 🎯 Exemples d'utilisation
+## Exemples d'utilisation
 
 ### Comparaison simple
 ```bash
@@ -366,19 +366,10 @@ Conclusion: Approche scalaire en moyenne meilleure de +135.0%
 ---
 
 
-## 🤝 Contribution
+##  Contribution
 
 1. Fork le projet
 2. Créez une branche pour votre fonctionnalité (`git checkout -b feature/AmazingFeature`)
 3. Commit vos changements (`git commit -m 'Add some AmazingFeature'`)
 4. Push vers la branche (`git push origin feature/AmazingFeature`)
 5. Ouvrez une Pull Request
-
-## 📄 Licence
-
-Ce projet est distribué sous licence MIT. Voir le fichier `LICENSE` pour plus de détails.
-
-## 👥 Auteurs
-
-- Rémi Raoul
-- Basé sur le TP de la Mineure IA - Résolution de problèmes multi-objectif

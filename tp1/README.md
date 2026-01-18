@@ -67,10 +67,10 @@ Si un répertoire de sortie est spécifié (`-o`), le programme sauvegarde les r
 
 **Génération de graphiques**:
 - Utiliser `make graphs` pour générer automatiquement un graphique PNG comparant les performances des algorithmes
-- Le graphique est sauvegardé dans `results/results_[instance]_[k].png`
+- Le graphique est sauvegardé dans `results/images/results_[instance]_[k].png`
 - Nécessite l'installation de Gnuplot : `sudo apt install gnuplot` (Ubuntu/Debian)
 
-- Pour générer tous les PNG en une commande : depuis le répertoire `tp1/`, exécuter `./generate_plots.sh` (génère tous les PNG listés par les scripts `.gnuplot` dans `tp1/results/`).
+- Pour générer tous les PNG en une commande : depuis le répertoire `tp1/`, exécuter `./generate_plots.sh` (génère tous les PNG listés par les scripts `.gnuplot` dans `tp1/results/images/`).
 
 > Voir aussi : [`tp1/gnuplot_examples.md`](tp1/gnuplot_examples.md) pour des exemples d'utilisation et des scripts prêts à l'emploi.
 
@@ -120,14 +120,14 @@ Si un répertoire de sortie est spécifié (`-o`), le programme sauvegarde les r
 ## Résultats expérimentaux (TP1)
 
 ### Données et graphiques
-- Les résultats agrégés sont disponibles dans `results/experiment_results.txt`.
-- Le graphique synthétique est disponible : `results/experiment_results.png`.
+- Les résultats agrégés sont disponibles dans `results/images/experiment_results.txt`.
+- Le graphique synthétique est disponible : `results/images/experiment_results.png`.
 - Graphiques par instance (exemples) :
-  - `results/7_5_01.txt_results.png`
-  - `results/20_10_01.txt_results.png`
-  - `results/50_20_01.txt_results.png`
+  - `results/images/7_5_01.txt_results.png`
+  - `results/images/20_10_01.txt_results.png`
+  - `results/images/50_20_01.txt_results.png`
 
-> Consulter le répertoire `tp1/results/` pour la collection complète de figures et scripts Gnuplot.
+> Consulter le répertoire `tp1/results/images/` pour la collection complète de figures et scripts Gnuplot.
 
 ### Observations (analyse succincte)
 1. **Performances globales** : Les algorithmes conçus (`Mon algorithme` et `Mon algorithme v2`) présentent une performance moyenne meilleure ou équivalente aux hill-climbers standards sur la plupart des instances, en particulier pour le voisinage *insertion*.
@@ -149,12 +149,12 @@ Si un répertoire de sortie est spécifié (`-o`), le programme sauvegarde les r
 
 - Figure 1 — Synthèse des coûts moyens par algorithme :
 
-  ![Synthèse résultats TP1](results/experiment_results.png)
+  ![Synthèse résultats TP1](results/images/experiment_results.png)
   *Légende : coût moyen (axe Y) pour chaque algorithme sous différentes configurations (axe X).* 
 
 - Figure 2 — Résultats pour `20_10_01` (exemple) :
 
-  ![Résultats 20_10_01](results/20_10_01.txt_results.png)
+  ![Résultats 20_10_01](results/images/20_10_01.txt_results.png)
   *Légende : comparaison des algorithmes pour `20_10_01` selon le voisinage et le budget d'évaluations.*
 
 ---
