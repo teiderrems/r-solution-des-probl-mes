@@ -1,0 +1,283 @@
+<!doctype html>
+<html lang="fr">
+<head><meta charset="utf-8"><title>Galerie Résultats TP1 & TP2</title>
+<style>
+  body{font-family:Arial,Helvetica,sans-serif;margin:20px;}
+  img{max-width:100%;height:auto;border:1px solid #ddd;padding:4px;margin:8px 0;}
+
+  /* Grille : 2 colonnes par défaut, 1 colonne sur petits écrans */
+  .grid{
+    display:grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap:16px;
+    align-items:start;
+  }
+  @media (max-width:700px){
+    .grid{grid-template-columns: 1fr;}
+  }
+
+  .card{border:1px solid #eee;padding:10px;border-radius:6px;display:flex;flex-direction:column;align-items:center;}
+  .card img{width:100%;height:360px;object-fit:cover;border-radius:4px;margin:8px 0;border:1px solid #ddd;padding:2px;}
+
+  /* Lightbox overlay */
+  .overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);display:none;align-items:center;justify-content:center;z-index:1000;padding:20px;}
+  .overlay img{max-width:90%;max-height:90%;border-radius:6px;box-shadow:0 6px 18px rgba(0,0,0,0.5);}
+  .overlay .close{position:absolute;top:18px;right:24px;color:#fff;font-size:36px;line-height:1;cursor:pointer;padding:6px;background:transparent;border:none;}
+
+  table{border-collapse:collapse;width:100%;}
+  td,th{border:1px solid #ddd;padding:6px;text-align:left;}
+</style>
+</head><body>
+<h1>Galerie — Résultats TP1 & TP2</h1>
+<h2>TP1 — Résultats (CSV)</h2>
+<table border="1" class="dataframe card">
+  <thead>
+    <tr style="text-align: right;">
+      <th>Instance</th>
+      <th>MaxEvals</th>
+      <th>Algo</th>
+      <th>Voisinage</th>
+      <th>CoûtMoyen</th>
+      <th>TempsMoyen(s)</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>20_10_01.txt</td>
+      <td>1000</td>
+      <td>Marche aléatoire</td>
+      <td>Échange</td>
+      <td>1796.7</td>
+      <td>0.003</td>
+    </tr>
+    <tr>
+      <td>20_10_01.txt</td>
+      <td>1000</td>
+      <td>Climber First</td>
+      <td>Échange</td>
+      <td>1678.3</td>
+      <td>0.002</td>
+    </tr>
+    <tr>
+      <td>20_10_01.txt</td>
+      <td>1000</td>
+      <td>Climber Best</td>
+      <td>Échange</td>
+      <td>1725.1</td>
+      <td>0.003</td>
+    </tr>
+    <tr>
+      <td>20_10_01.txt</td>
+      <td>1000</td>
+      <td>Mon algorithme</td>
+      <td>Échange</td>
+      <td>1661.9</td>
+      <td>0.002</td>
+    </tr>
+    <tr>
+      <td>20_10_01.txt</td>
+      <td>1000</td>
+      <td>Mon algorithme v2</td>
+      <td>Échange</td>
+      <td>1651.7</td>
+      <td>0.002</td>
+    </tr>
+    <tr>
+      <td>20_10_01.txt</td>
+      <td>1000</td>
+      <td>Marche aléatoire</td>
+      <td>Insertion</td>
+      <td>1819.6</td>
+      <td>0.003</td>
+    </tr>
+    <tr>
+      <td>20_10_01.txt</td>
+      <td>1000</td>
+      <td>Climber First</td>
+      <td>Insertion</td>
+      <td>1645.0</td>
+      <td>0.003</td>
+    </tr>
+    <tr>
+      <td>20_10_01.txt</td>
+      <td>1000</td>
+      <td>Climber Best</td>
+      <td>Insertion</td>
+      <td>1811.3</td>
+      <td>0.003</td>
+    </tr>
+    <tr>
+      <td>20_10_01.txt</td>
+      <td>1000</td>
+      <td>Mon algorithme</td>
+      <td>Insertion</td>
+      <td>1633.9</td>
+      <td>0.003</td>
+    </tr>
+    <tr>
+      <td>20_10_01.txt</td>
+      <td>1000</td>
+      <td>Mon algorithme v2</td>
+      <td>Insertion</td>
+      <td>1640.4</td>
+      <td>0.004</td>
+    </tr>
+  </tbody>
+</table>
+<h2>TP2 — Résultats (CSV)</h2>
+<table border="1" class="dataframe card">
+  <thead>
+    <tr style="text-align: right;">
+      <th>Instance</th>
+      <th>MaxIter</th>
+      <th>ParetoSize</th>
+      <th>Algo</th>
+      <th>Hypervolume</th>
+      <th>Solutions</th>
+      <th>Temps(s)</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>20_10_01</td>
+      <td>100</td>
+      <td>5</td>
+      <td>scalar</td>
+      <td>6597797.52</td>
+      <td>2.0</td>
+      <td>0.068</td>
+    </tr>
+    <tr>
+      <td>20_10_01</td>
+      <td>100</td>
+      <td>5</td>
+      <td>pareto</td>
+      <td>4057557.28</td>
+      <td>3.0</td>
+      <td>0.013</td>
+    </tr>
+    <tr>
+      <td>20_10_01</td>
+      <td>100</td>
+      <td>10</td>
+      <td>scalar</td>
+      <td>5429970.15</td>
+      <td>4.0</td>
+      <td>0.076</td>
+    </tr>
+    <tr>
+      <td>20_10_01</td>
+      <td>100</td>
+      <td>10</td>
+      <td>pareto</td>
+      <td>2919725.80</td>
+      <td>7.0</td>
+      <td>0.013</td>
+    </tr>
+    <tr>
+      <td>20_10_01</td>
+      <td>100</td>
+      <td>20</td>
+      <td>scalar</td>
+      <td>4259176.20</td>
+      <td>3.0</td>
+      <td>0.053</td>
+    </tr>
+    <tr>
+      <td>20_10_01</td>
+      <td>100</td>
+      <td>20</td>
+      <td>pareto</td>
+      <td>2953410.75</td>
+      <td>6.0</td>
+      <td>0.011</td>
+    </tr>
+    <tr>
+      <td>20_10_01</td>
+      <td>500</td>
+      <td>5</td>
+      <td>scalar</td>
+      <td>6000753.88</td>
+      <td>4.0</td>
+      <td>0.056</td>
+    </tr>
+    <tr>
+      <td>20_10_01</td>
+      <td>500</td>
+      <td>5</td>
+      <td>pareto</td>
+      <td>3631293.58</td>
+      <td>9.0</td>
+      <td>0.075</td>
+    </tr>
+    <tr>
+      <td>20_10_01</td>
+      <td>500</td>
+      <td>10</td>
+      <td>scalar</td>
+      <td>5578035.36</td>
+      <td>4.0</td>
+      <td>0.067</td>
+    </tr>
+    <tr>
+      <td>20_10_01</td>
+      <td>500</td>
+      <td>10</td>
+      <td>pareto</td>
+      <td>3442382.75</td>
+      <td>5.0</td>
+      <td>0.055</td>
+    </tr>
+  </tbody>
+</table>
+<h2>Graphiques générés</h2>
+<h3>TP1 — Plots Coût</h3>
+<div class="grid">
+<div class="card"><h4>tp1_20_10_01.txt_cost.png</h4><a href="tp1_20_10_01.txt_cost.png" class="lightbox-trigger" data-caption="tp1_20_10_01.txt_cost.png"><img src="tp1_20_10_01.txt_cost.png" alt="tp1_20_10_01.txt_cost.png"></a></div>
+</div>
+<h3>TP2 — Hypervolume</h3>
+<div class="grid">
+<div class="card"><h4>hypervolume_vs_instance_max_iter_100_pareto_size_10.png</h4><a href="hypervolume_vs_instance_max_iter_100_pareto_size_10.png" class="lightbox-trigger" data-caption="hypervolume_vs_instance_max_iter_100_pareto_size_10.png"><img src="hypervolume_vs_instance_max_iter_100_pareto_size_10.png" alt="hypervolume_vs_instance_max_iter_100_pareto_size_10.png"></a></div>
+</div>
+<div id="overlay" class="overlay" aria-hidden="true">
+  <button class="close" id="lb-close" aria-label="Fermer">&times;</button>
+  <img id="overlay-img" src="" alt="">
+  <div id="overlay-caption" style="color:#fff;margin-top:8px;text-align:center;"></div>
+</div>
+<script>
+(function(){
+  const overlay = document.getElementById('overlay');
+  const overlayImg = document.getElementById('overlay-img');
+  const caption = document.getElementById('overlay-caption');
+  const closeBtn = document.getElementById('lb-close');
+  function openLightbox(src, captionText){
+    overlayImg.src = src;
+    caption.textContent = captionText || ''; 
+    overlay.style.display = 'flex';
+    overlay.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeLightbox(){
+    overlay.style.display = 'none';
+    overlayImg.src = '';
+    overlay.setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = '';
+  }
+  document.querySelectorAll('a.lightbox-trigger').forEach(function(a){
+    a.addEventListener('click', function(e){
+      e.preventDefault();
+      openLightbox(a.href, a.getAttribute('data-caption') || a.title || (a.querySelector('img') && a.querySelector('img').alt) || '');
+    });
+  });
+  overlay.addEventListener('click', function(e){
+    if(e.target === overlay || e.target === closeBtn){
+      closeLightbox();
+    }
+  });
+  closeBtn.addEventListener('click', closeLightbox);
+  document.addEventListener('keydown', function(e){
+    if(e.key === 'Escape' && overlay.style.display === 'flex') closeLightbox();
+  });
+})();
+</script>
+</body></html>
